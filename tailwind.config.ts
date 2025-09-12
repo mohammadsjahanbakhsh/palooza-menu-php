@@ -47,6 +47,10 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        /* Custom Persian Restaurant Colors */
+        "table-available": "hsl(var(--table-available))",
+        "table-occupied": "hsl(var(--table-occupied))",
+        "table-hover": "hsl(var(--table-hover))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
