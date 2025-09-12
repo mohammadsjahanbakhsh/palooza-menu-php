@@ -84,50 +84,98 @@ const menuItems: MenuItem[] = [
     category: "main"
   },
 
-  // نوشیدنی ها
+  // نوشیدنی ها گرم
   {
     id: 8,
     name: "چای سنتی",
     description: "چای داخلی با شکر نبات",
     price: 25000,
-    category: "drinks"
+    category: "drinks",
+    image: "🫖"
   },
   {
     id: 9,
-    name: "دوغ گازدار",
-    description: "دوغ خانگی با نعنا",
-    price: 30000,
-    category: "drinks"
+    name: "قهوه ترک",
+    description: "قهوه ترک اصل با هل",
+    price: 35000,
+    category: "drinks", 
+    image: "☕"
   },
   {
     id: 10,
+    name: "چای ماسالا",
+    description: "چای هندی با ادویه‌جات",
+    price: 30000,
+    category: "drinks",
+    image: "🍵"
+  },
+  
+  // نوشیدنی های سرد
+  {
+    id: 11,
+    name: "دوغ گازدار",
+    description: "دوغ خانگی با نعنا و خیار",
+    price: 30000,
+    category: "cold-drinks",
+    image: "🥤"
+  },
+  {
+    id: 12,
     name: "آب آلبالو",
     description: "شربت آلبالوی طبیعی",
     price: 35000,
-    category: "drinks"
+    category: "cold-drinks",
+    image: "🍹"
+  },
+  {
+    id: 13,
+    name: "لیموناد",
+    description: "لیموناد تازه با نعنا",
+    price: 40000,
+    category: "cold-drinks",
+    image: "🍋"
+  },
+  {
+    id: 14,
+    name: "شیک موز",
+    description: "شیک موز با بستنی وانیل",
+    price: 55000,
+    category: "cold-drinks",
+    image: "🍌"
   },
 
   // دسرها
   {
-    id: 11,
+    id: 15,
     name: "فالوده شیرازی",
     description: "فالوده سنتی با بستنی و شربت",
     price: 65000,
-    category: "desserts"
+    category: "desserts",
+    image: "🍧"
   },
   {
-    id: 12,
+    id: 16,
     name: "بستنی زعفرانی",
     description: "بستنی خانگی با زعفران",
     price: 55000,
-    category: "desserts"
+    category: "desserts",
+    image: "🍨"
+  },
+  {
+    id: 17,
+    name: "باقلوا",
+    description: "باقلوا سنتی با عسل و پسته",
+    price: 45000,
+    category: "desserts",
+    image: "🧁"
   }
 ];
 
 const categories = {
   appetizers: "پیش غذا",
   main: "غذای اصلی", 
-  drinks: "نوشیدنی",
+  drinks: "نوشیدنی گرم",
+  "cold-drinks": "نوشیدنی سرد",
   desserts: "دسر"
 };
 
@@ -199,9 +247,9 @@ export const RestaurantMenu = ({ table, onClose }: RestaurantMenuProps) => {
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <Tabs defaultValue="main" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 {Object.entries(categories).map(([key, value]) => (
-                  <TabsTrigger key={key} value={key} className="text-sm">
+                  <TabsTrigger key={key} value={key} className="text-xs px-2">
                     {value}
                   </TabsTrigger>
                 ))}
@@ -213,16 +261,23 @@ export const RestaurantMenu = ({ table, onClose }: RestaurantMenuProps) => {
                     {menuItems
                       .filter(item => item.category === category)
                       .map(item => (
-                        <Card key={item.id} className="p-4 hover:shadow-md transition-shadow">
+                        <Card key={item.id} className="p-4 hover:shadow-lg transition-all duration-200 border-l-4 border-l-primary/20">
                           <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-lg">{item.name}</h3>
-                              <p className="text-muted-foreground text-sm mt-1">
-                                {item.description}
-                              </p>
-                              <p className="text-primary font-bold mt-2">
-                                {formatPrice(item.price)}
-                              </p>
+                            <div className="flex items-start gap-3 flex-1">
+                              {item.image && (
+                                <div className="text-2xl bg-muted rounded-full w-12 h-12 flex items-center justify-center">
+                                  {item.image}
+                                </div>
+                              )}
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-lg">{item.name}</h3>
+                                <p className="text-muted-foreground text-sm mt-1 line-clamp-2">
+                                  {item.description}
+                                </p>
+                                <p className="text-primary font-bold mt-2 text-lg">
+                                  {formatPrice(item.price)}
+                                </p>
+                              </div>
                             </div>
                             
                             <div className="flex items-center gap-2 mr-4">
@@ -268,43 +323,87 @@ export const RestaurantMenu = ({ table, onClose }: RestaurantMenuProps) => {
 
           {/* سبد خرید */}
           <div className="lg:col-span-1">
-            <Card className="p-4 sticky top-4">
-              <h3 className="font-semibold text-lg mb-4">سفارش شما</h3>
+            <Card className="sticky top-4 shadow-lg border-0 bg-gradient-to-b from-background to-muted/30">
+              <div className="p-4 border-b border-border/50">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-lg">🛒 سبد خرید</h3>
+                  {cart.length > 0 && (
+                    <Badge variant="secondary" className="bg-primary/10 text-primary">
+                      {cart.reduce((sum, item) => sum + item.quantity, 0)} آیتم
+                    </Badge>
+                  )}
+                </div>
+              </div>
               
-              {cart.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">
-                  هیچ آیتمی انتخاب نشده
-                </p>
-              ) : (
-                <div className="space-y-4">
-                  {cart.map(item => (
-                    <div key={item.id} className="flex justify-between items-center">
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{item.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatPrice(item.price)} × {item.quantity}
-                        </p>
-                      </div>
-                      <p className="font-semibold text-sm">
-                        {formatPrice(item.price * item.quantity)}
-                      </p>
-                    </div>
-                  ))}
-                  
-                  <hr className="my-4" />
-                  
-                  <div className="flex justify-between items-center">
-                    <p className="font-bold">مجموع:</p>
-                    <p className="font-bold text-primary">
-                      {formatPrice(getTotalPrice())}
+              <div className="p-4">
+                {cart.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">🍽️</div>
+                    <p className="text-muted-foreground">
+                      سبد خرید شما خالی است
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      محصولات مورد علاقه خود را اضافه کنید
                     </p>
                   </div>
-                  
-                  <Button className="w-full mt-4" size="lg">
-                    ثبت سفارش
-                  </Button>
-                </div>
-              )}
+                ) : (
+                  <div className="space-y-3">
+                    {cart.map(item => (
+                      <div key={item.id} className="bg-muted/30 rounded-lg p-3 border border-border/30">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{item.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {formatPrice(item.price)} × {item.quantity}
+                            </p>
+                          </div>
+                          <p className="font-bold text-primary text-sm">
+                            {formatPrice(item.price * item.quantity)}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeFromCart(item.id)}
+                            className="h-7 w-7 p-0"
+                          >
+                            <Minus size={12} />
+                          </Button>
+                          <span className="mx-2 font-medium text-sm min-w-[20px] text-center">
+                            {item.quantity}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => addToCart(item)}
+                            className="h-7 w-7 p-0"
+                          >
+                            <Plus size={12} />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    <div className="border-t border-border/50 pt-4 mt-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <p className="font-bold text-lg">مجموع کل:</p>
+                        <p className="font-bold text-primary text-xl">
+                          {formatPrice(getTotalPrice())}
+                        </p>
+                      </div>
+                      
+                      <Button className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg">
+                        🍽️ ثبت سفارش ({cart.reduce((sum, item) => sum + item.quantity, 0)} آیتم)
+                      </Button>
+                      
+                      <p className="text-xs text-muted-foreground text-center mt-2">
+                        ارسال رایگان برای سفارش‌های بالای ۲۰۰ هزار تومان
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </Card>
           </div>
         </div>
