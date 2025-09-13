@@ -1,85 +1,79 @@
-import React from "react";
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-const Login: React.FC = () => {
+export default function Login() {
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate()
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    setLoading(true)
+    try {
+      const res = await fetch('/api/login.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+        credentials: 'include',
+      })
+      const data = await res.json()
+      if (!res.ok || data.status !== 'success') {
+        throw new Error(data.message || 'ورود ناموفق بود')
+      }
+      navigate('/')
+    } catch (err: any) {
+      setError(err.message || 'خطای ناشناخته')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-accent flex items-center justify-center" dir="rtl">
-      <main className="w-full max-w-md bg-white shadow-lg rounded-lg p-8 border-t-8 border-primary">
-        {/* لوگو */}
-        <div className="flex justify-center mb-4">
-          <div className="bg-white rounded-full p-3 shadow-lg">
-            <img
-              src="/assets/logo_animation.gif"
-              alt="کافه کتاب‌فروشی"
-              className="w-20 h-20 object-contain"
-            />
-          </div>
-        </div>
-
-        {/* عنوان */}
-        <h1 className="text-2xl font-bold text-primary text-center">
-          ورود به کافه کتاب‌فروشی
-        </h1>
-        <p className="text-gray-600 mt-2 text-center">
-          برای پیوستن به جمع دوستان کتاب، وارد شوید
-        </p>
-
-        {/* فرم */}
-        <form className="space-y-4 mt-6" onSubmit={(e) => e.preventDefault()}>
-          <div>
-            <label className="block text-right text-gray-700 mb-1">
-              نام کاربری یا ایمیل
-            </label>
+    <div className="min-h-dvh flex items-center justify-center bg-[hsl(var(--background))] p-4" dir="rtl">
+      <div className="w-full max-w-md rounded-2xl bg-[hsl(var(--card))] shadow-lg border border-[hsl(var(--border))] p-6">
+        <h1 className="text-center text-xl font-semibold text-[hsl(var(--foreground))] mb-4">ورود به سامانه</h1>
+        <form onSubmit={handleSubmit} className="grid gap-3">
+          <label className="grid gap-1.5">
+            <span className="text-sm text-[hsl(var(--foreground))]">نام کاربری</span>
             <input
               type="text"
-              className="w-full border border-border rounded px-3 py-2 focus:outline-none focus:border-secondary"
-              placeholder="نام کاربری یا ایمیل"
+              placeholder="مثلاً: admin"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
+              className="w-full rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2.5 text-[hsl(var(--foreground))] outline-none focus:ring-4 focus:ring-[color:rgba(25,118,210,0.15)] focus:border-[hsl(var(--ring))]"
             />
-          </div>
+          </label>
 
-          <div>
-            <label className="block text-right text-gray-700 mb-1">
-              رمز عبور
-            </label>
+          <label className="grid gap-1.5">
+            <span className="text-sm text-[hsl(var(--foreground))]">رمز عبور</span>
             <input
               type="password"
-              className="w-full border border-border rounded px-3 py-2 focus:outline-none focus:border-secondary"
-              placeholder="رمز عبور"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
+              className="w-full rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2.5 text-[hsl(var(--foreground))] outline-none focus:ring-4 focus:ring-[color:rgba(25,118,210,0.15)] focus:border-[hsl(var(--ring))]"
             />
-          </div>
+          </label>
 
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center">
-              <input type="checkbox" className="ml-2" />
-              مرا به خاطر بسپار
-            </label>
-            <a href="#" className="text-secondary hover:underline">
-              رمز عبور را فراموش کرده‌اید؟
-            </a>
-          </div>
+          {error && (
+            <div className="rounded-xl border border-red-200 bg-red-50 text-red-700 px-3 py-2 text-sm">
+              {error}
+            </div>
+          )}
 
           <button
-            type="submit"
-            className="w-full bg-primary hover:bg-secondary text-primary-foreground py-2 rounded transition-colors"
+            className="mt-1 w-full rounded-xl bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] font-semibold py-2.5 transition active:translate-y-px disabled:opacity-60"
+            disabled={loading}
           >
-            ورود
+            {loading ? 'در حال ورود…' : 'ورود'}
           </button>
         </form>
-
-        <p className="text-center text-sm text-gray-500 mt-4">
-          حساب کاربری ندارید؟{" "}
-          <a href="#" className="text-secondary hover:underline">
-            ثبت نام کنید
-          </a>
-        </p>
-
-        <footer className="text-center text-gray-400 mt-6 text-xs">
-          © ۲۰۲۵ کافه کتاب‌فروشی
-        </footer>
-      </main>
+      </div>
     </div>
-  );
-};
-
-export default Login;
+  )
+}

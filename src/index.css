@@ -1,18 +1,81 @@
+/* src/index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* فونت و RTL */
+:root { --radius: 12px; }
+html { direction: rtl; }
+body { font-family: system-ui, -apple-system, Segoe UI, Roboto, "Vazirmatn", sans-serif; }
+
+/* تم روشن */
 :root {
-  --background: 220 100% 97%;
-  --foreground: 222.2 47.4% 11.2%;
-  --primary: 224.1 62.3% 32.9%;
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 213 90% 48%;                /* آبی */
   --primary-foreground: 0 0% 100%;
-  --secondary: 221.2 83.2% 53.3%;
-  --secondary-foreground: 0 0% 100%;
-  --accent: 220 100% 97%;
-  --accent-foreground: 224.1 62.3% 32.9%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 224.1 62.3% 32.9%;
-  --radius: 0.5rem;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 11%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222 47% 11%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 213 90% 48%;
+
+  --sidebar-background: 220 14% 96%;
+  --sidebar-foreground: 222 47% 11%;
+  --sidebar-primary: 213 90% 48%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 210 40% 96%;
+  --sidebar-accent-foreground: 222 47% 11%;
+  --sidebar-border: 214 32% 91%;
+  --sidebar-ring: 213 90% 48%;
+
+  --table-available: 142 71% 45%;
+  --table-occupied: 0 84% 60%;
+  --table-hover: 213 90% 96%;
+}
+
+/* تم تیره */
+.dark {
+  --background: 222 47% 7%;
+  --foreground: 210 40% 98%;
+  --card: 222 47% 9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222 47% 9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 213 90% 60%;
+  --primary-foreground: 222 47% 9%;
+  --secondary: 217 33% 17%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 217 33% 17%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
+  --ring: 213 90% 60%;
+
+  --sidebar-background: 222 47% 9%;
+  --sidebar-foreground: 210 40% 98%;
+  --sidebar-primary: 213 90% 60%;
+  --sidebar-primary-foreground: 222 47% 9%;
+  --sidebar-accent: 217 33% 17%;
+  --sidebar-accent-foreground: 210 40% 98%;
+  --sidebar-border: 217 33% 17%;
+  --sidebar-ring: 213 90% 60%;
+
+  --table-available: 142 71% 45%;
+  --table-occupied: 0 84% 60%;
+  --table-hover: 213 32% 20%;
 }
