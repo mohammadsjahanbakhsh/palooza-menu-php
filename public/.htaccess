@@ -1,14 +1,19 @@
+# اولویت نمایش فایل‌های PHP
+DirectoryIndex index.php index.html
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
+  # اگر درخواست به api/ یا هر فایل php است، بدون تغییر ادامه بده
   RewriteRule ^api/ - [L]
+  RewriteRule \.php$ - [L]
 
+  # اگر فایل یا پوشه روی دیسک وجود داشت، برگردان
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule . - [L]
 
+  # بقیه درخواست‌ها را به index.html (SPA) هدایت کن
   RewriteRule . /index.html [L]
 </IfModule>
-
-DirectoryIndex index.html

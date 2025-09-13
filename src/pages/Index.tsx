@@ -1,97 +1,56 @@
-import type { Config } from "tailwindcss";
+// src/pages/Index.tsx
+import React from 'react'
+import { Link } from 'react-router-dom'
+import backgroundIndex from '../assets/backgroundindex.png'
+import logo from '../assets/bookstore-logo-BdxIlNK5.jpg'
 
-export default {
-  darkMode: ["class"],
-  content: [
-    "./index.html",
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
-  ],
-  prefix: "",
-  theme: {
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
-    },
-    extend: {
-      colors: {
-        // Core tokens (read from CSS variables you set in src/index.css)
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+export default function Index() {
+  return (
+    <div
+      className="relative min-h-screen bg-center bg-cover px-4 py-8 sm:px-6 sm:py-12"
+      style={{ backgroundImage: `url(${backgroundIndex})` }}
+      dir="rtl"
+    >
+      {/* لایهٔ نیمه‌شفاف روی بک‌گراند */}
+      <div className="absolute inset-0 bg-gray-900 bg-opacity-40" />
 
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
-        },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
-        },
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
-        },
+      {/* کارت محتوا با فِلِکس و آیتم‌سِنتِر برای وسط‌چین کردن تمام محتویات */}
+      <div className="relative z-10 w-full max-w-md mx-auto bg-white bg-opacity-80 border-2 border-white rounded-2xl p-6 sm:p-10 flex flex-col items-center">
+        {/* لوگوی مرکزی */}
+        <div className="flex justify-center mb-6">
+          <div className="w-20 h-20 sm:w-28 sm:h-28 bg-white rounded-full overflow-hidden border-4 border-[hsl(var(--primary))] flex items-center justify-center">
+            <img
+              src={logo}
+              alt="لوگوی سامانه"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
 
-        /* Project custom tokens (already referenced in your code) */
-        "table-available": "hsl(var(--table-available))",
-        "table-occupied": "hsl(var(--table-occupied))",
-        "table-hover": "hsl(var(--table-hover))",
+        {/* عنوان و توضیح */}
+        <h1 className="text-lg sm:text-2xl font-bold mb-2 text-[hsl(var(--foreground))] text-center">
+          خوش‌آمدید به سامانهٔ پالووزا
+        </h1>
+        <p className="text-sm sm:text-base mb-6 text-[hsl(var(--foreground))] text-center">
+          برای ادامه لطفاً وارد شوید یا ثبت‌نام کنید.
+        </p>
 
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
-        },
-      },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
-      },
-      keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
-        },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
-        },
-      },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-      },
-    },
-  },
-  plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+        {/* دکمه‌ها؛ فِلِکس-کُالم در موبایل و فِلِکس-رُو در دسکتاپ */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Link
+            to="/login"
+            className="w-full sm:w-auto text-center rounded-xl bg-[hsl(var(--primary))] px-4 py-2 text-[hsl(var(--primary-foreground))] font-medium transition hover:opacity-90"
+          >
+            ورود
+          </Link>
+          <Link
+            to="/register"
+            className="w-full sm:w-auto text-center rounded-xl border border-[hsl(var(--primary))] px-4 py-2 text-[hsl(var(--primary))] font-medium transition hover:bg-[hsl(var(--primary))] hover:text-[hsl(var(--primary-foreground))]"
+          >
+            ثبت‌نام
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}

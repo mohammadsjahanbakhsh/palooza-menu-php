@@ -3,9 +3,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Index from "./pages/Index";
+import Index from "././pages/Index";
 import NotFound from "./pages/NotFound";
-import Login from "./pages/Login"; // ← اضافه شد
+import Login from "./pages/Login"; 
+
 
 const queryClient = new QueryClient();
 
