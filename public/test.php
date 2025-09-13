@@ -1,5 +1,5 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-header("Location: login.php");
-exit;
+
+echo "تست PHP ✅";

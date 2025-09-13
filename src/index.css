@@ -2,151 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Persian Restaurant Design System - Warm & Elegant Colors */
-
-@layer base {
-  :root {
-    /* Persian Restaurant Palette */
-    --background: 42 45% 97%;
-    --foreground: 30 25% 15%;
-
-    --card: 42 45% 98%;
-    --card-foreground: 30 25% 15%;
-
-    --popover: 42 45% 98%;
-    --popover-foreground: 30 25% 15%;
-
-    /* Persian Green - Main Brand Color */
-    --primary: 142 76% 36%;
-    --primary-foreground: 0 0% 98%;
-
-    /* Golden Persian */
-    --secondary: 43 96% 56%;
-    --secondary-foreground: 30 25% 15%;
-
-    --muted: 42 25% 92%;
-    --muted-foreground: 30 15% 45%;
-
-    /* Persian Saffron */
-    --accent: 43 96% 56%;
-    --accent-foreground: 30 25% 15%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 42 20% 88%;
-    --input: 42 20% 88%;
-    --ring: 142 76% 36%;
-
-    --radius: 1rem;
-
-    /* Custom Restaurant Colors */
-    --table-available: 142 76% 36%;
-    --table-occupied: 0 84% 60%;
-    --table-hover: 142 76% 46%;
-    
-    /* Persian Gradients */
-    --gradient-persian: linear-gradient(135deg, hsl(142 76% 36%), hsl(43 96% 56%));
-    --gradient-subtle: linear-gradient(180deg, hsl(42 45% 98%), hsl(42 25% 95%));
-    
-    /* Elegant Shadows */
-    --shadow-persian: 0 10px 30px -10px hsl(142 76% 36% / 0.2);
-    --shadow-golden: 0 10px 30px -10px hsl(43 96% 56% / 0.15);
-    
-    /* Animations */
-    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-
-    --sidebar-background: 42 25% 95%;
-    --sidebar-foreground: 30 25% 25%;
-    --sidebar-primary: 142 76% 36%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 42 25% 90%;
-    --sidebar-accent-foreground: 30 25% 25%;
-    --sidebar-border: 42 20% 85%;
-    --sidebar-ring: 142 76% 36%;
-  }
-
-  .dark {
-    --background: 30 25% 8%;
-    --foreground: 42 45% 95%;
-
-    --card: 30 25% 10%;
-    --card-foreground: 42 45% 95%;
-
-    --popover: 30 25% 10%;
-    --popover-foreground: 42 45% 95%;
-
-    --primary: 142 76% 46%;
-    --primary-foreground: 30 25% 8%;
-
-    --secondary: 43 96% 66%;
-    --secondary-foreground: 30 25% 8%;
-
-    --muted: 30 15% 15%;
-    --muted-foreground: 42 25% 65%;
-
-    --accent: 43 96% 66%;
-    --accent-foreground: 30 25% 8%;
-
-    --destructive: 0 62.8% 50%;
-    --destructive-foreground: 42 45% 95%;
-
-    --border: 30 15% 20%;
-    --input: 30 15% 20%;
-    --ring: 142 76% 46%;
-    
-    --table-available: 142 76% 46%;
-    --table-occupied: 0 84% 60%;
-    --table-hover: 142 76% 56%;
-    
-    --sidebar-background: 30 25% 12%;
-    --sidebar-foreground: 42 45% 85%;
-    --sidebar-primary: 142 76% 46%;
-    --sidebar-primary-foreground: 30 25% 8%;
-    --sidebar-accent: 30 15% 18%;
-    --sidebar-accent-foreground: 42 45% 85%;
-    --sidebar-border: 30 15% 18%;
-    --sidebar-ring: 142 76% 46%;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground font-sans;
-  }
-  
-  /* Custom Persian Restaurant Animations */
-  .table-pulse {
-    animation: table-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-  
-  .menu-slide-in {
-    animation: menu-slide-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  }
-}
-
-@keyframes table-pulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 hsl(var(--table-available) / 0.4);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 10px hsl(var(--table-available) / 0);
-  }
-}
-
-@keyframes menu-slide-in {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+:root {
+  --background: 220 100% 97%;
+  --foreground: 222.2 47.4% 11.2%;
+  --primary: 224.1 62.3% 32.9%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 221.2 83.2% 53.3%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 220 100% 97%;
+  --accent-foreground: 224.1 62.3% 32.9%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 224.1 62.3% 32.9%;
+  --radius: 0.5rem;
 }
