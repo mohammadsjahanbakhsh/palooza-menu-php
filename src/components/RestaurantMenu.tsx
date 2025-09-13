@@ -9,7 +9,8 @@ interface Table {
   id: number;
   number: string;
   seats: number;
-  status: "available" | "occupied";
+  status: "empty" | "reserved" | "in-service" | "settled";
+  timeInfo?: string;
 }
 
 interface MenuItem {
