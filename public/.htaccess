@@ -1,19 +1,21 @@
-# اولویت نمایش فایل‌های PHP
-DirectoryIndex index.php index.html
+# Prefer serving index.html for SPA
+DirectoryIndex index.html index.php
 
 <IfModule mod_rewrite.c>
+  Options -MultiViews
   RewriteEngine On
-  RewriteBase /
-
-  # اگر درخواست به api/ یا هر فایل php است، بدون تغییر ادامه بده
+  
+  # Allow API and PHP requests to pass through unchanged
   RewriteRule ^api/ - [L]
   RewriteRule \.php$ - [L]
 
-  # اگر فایل یا پوشه روی دیسک وجود داشت، برگردان
+  RewriteBase /bookstore/
+
+  # If the requested file or directory exists, serve it directly
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
-  RewriteRule . - [L]
+  RewriteRule ^ - [L]
 
-  # بقیه درخواست‌ها را به index.html (SPA) هدایت کن
-  RewriteRule . /index.html [L]
+  # Redirect all other requests to index.html
+  RewriteRule ^ index.html [L]
 </IfModule>

@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, Clock } from "lucide-react";
 import { RestaurantMenu } from "./RestaurantMenu";
-
+// import { Table } from "@/types/cafe"
 interface Table {
   id: number;
   number: string;

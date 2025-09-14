@@ -1,41 +1,64 @@
 // src/pages/Login.tsx
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import  { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { useToast } from '@/hooks/use-toast'
+import { apiFetch, ApiError, NetworkError } from '@/lib/api'
 import backgroundIndex from '../assets/backgroundindex.png'
 import logo from '../assets/bookstore-logo-BdxIlNK5.jpg'
 
-export default function Login() {
+export default function Login(): JSX.Element {
+  const navigate = useNavigate()
+  const { toast } = useToast()
+
+  // form state
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const navigate = useNavigate()
 
+  // handle login form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setLoading(true)
+
     try {
-      const res = await fetch('/api/login.php', {
+      const data = await apiFetch('login.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
-        credentials: 'include',
       })
-      let data
-       try {
-         data = await res.json()
-       } catch (parseErr: any) {
-         // در صورت خطای پارس JSON، پیغام سفارشی بده
-         throw new Error('خطای سرور: پاسخِ نامعتبر دریافت شد. لطفاً دوباره تلاش کنید.')
-       }
-      if (!res.ok || data.status !== 'success') {
-        throw new Error(data.message || 'ورود ناموفق بود')
-      }
-      navigate('/')
+
+      // save logged-in user data
+      localStorage.setItem('currentUser', JSON.stringify(data.user))
+
+      // show success toast and redirect to dashboard
+      toast({ title: 'ورود موفق', description: 'خوش آمدید!' })
+      navigate('/dashboard')
     } catch (err: any) {
-     setError(err.message || 'خطای ناشناخته. لطفاً بعداً دوباره تلاش کنید.')
- 
+      if (err instanceof NetworkError) {
+        setError(err.message)
+        toast({
+          title: 'خطای شبکه',
+          description: err.message,
+          variant: 'destructive',
+        })
+      } else if (err instanceof ApiError) {
+        const msg = err.data?.message || err.message
+        setError(msg)
+        toast({
+          title: 'خطا در ورود',
+          description: msg,
+          variant: 'destructive',
+        })
+      } else {
+        const msg = err.message || 'خطای ناشناخته، دوباره تلاش کنید.'
+        setError(msg)
+        toast({
+          title: 'خطا در ورود',
+          description: msg,
+          variant: 'destructive',
+        })
+      }
     } finally {
       setLoading(false)
     }
@@ -47,28 +70,37 @@ export default function Login() {
       style={{ backgroundImage: `url(${backgroundIndex})` }}
       dir="rtl"
     >
-      {/* لایهٔ نیمه‌شفاف روی پس‌زمینه */}
+      {/* semi-transparent overlay */}
       <div className="absolute inset-0 bg-gray-900 bg-opacity-40" />
 
-      {/* کارت محتوا */}
-      <div className="relative z-10 w-full max-w-sm sm:max-w-md lg:max-w-lg mx-auto bg-white bg-opacity-90 border border-white rounded-2xl p-6 sm:p-10 flex flex-col items-center">
-        {/* لوگوی مرکزی */}
+      {/* login card */}
+      <div className="relative z-10 w-full max-w-sm sm:max-w-md lg:max-w-lg mx-auto
+                      bg-white bg-opacity-90 border border-white rounded-2xl
+                      p-6 sm:p-10 flex flex-col items-center"
+      >
+        {/* logo */}
         <div className="flex justify-center mb-6">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-white rounded-full overflow-hidden border-4 border-[hsl(var(--primary))] flex items-center justify-center">
+          <div
+            className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-white
+                       rounded-full overflow-hidden border-4
+                       border-[hsl(var(--primary))] flex items-center justify-center"
+          >
             <img
               src={logo}
-              alt="لوگوی سامانه"
+              alt="Bookstore Logo"
               className="w-full h-full object-cover"
             />
           </div>
         </div>
 
-        {/* عنوان */}
-        <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold mb-4 text-[hsl(var(--foreground))] text-center">
+        {/* title */}
+        <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold mb-4
+                       text-[hsl(var(--foreground))] text-center"
+        >
           ورود به سامانه
         </h1>
 
-        {/* فرم لاگین */}
+        {/* login form */}
         <form onSubmit={handleSubmit} className="w-full grid gap-4">
           <label className="grid gap-1">
             <span className="text-sm sm:text-base text-[hsl(var(--foreground))]">
@@ -78,9 +110,14 @@ export default function Login() {
               type="text"
               placeholder="مثلاً: admin"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={e => setUsername(e.target.value)}
               required
-              className="w-full rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 sm:px-4 sm:py-2.5 text-[hsl(var(--foreground))] text-sm sm:text-base outline-none focus:ring-4 focus:ring-[rgba(25,118,210,0.15)] focus:border-[hsl(var(--ring))]"
+              className="w-full rounded-xl border border-[hsl(var(--input))] 
+                         bg-[hsl(var(--background))] px-3 py-2 sm:px-4
+                         sm:py-2.5 text-[hsl(var(--foreground))] text-sm 
+                         sm:text-base outline-none focus:ring-4
+                         focus:ring-[rgba(25,118,210,0.15)]
+                         focus:border-[hsl(var(--ring))]"
             />
           </label>
 
@@ -92,14 +129,20 @@ export default function Login() {
               type="password"
               placeholder="••••••••"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               required
-              className="w-full rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 sm:px-4 sm:py-2.5 text-[hsl(var(--foreground))] text-sm sm:text-base outline-none focus:ring-4 focus:ring-[rgba(25,118,210,0.15)] focus:border-[hsl(var(--ring))]"
+              className="w-full rounded-xl border border-[hsl(var(--input))] 
+                         bg-[hsl(var(--background))] px-3 py-2 sm:px-4
+                         sm:py-2.5 text-[hsl(var(--foreground))] text-sm 
+                         sm:text-base outline-none focus:ring-4
+                         focus:ring-[rgba(25,118,210,0.15)]
+                         focus:border-[hsl(var(--ring))]"
             />
           </label>
 
           {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 text-red-700 px-3 py-2 text-xs sm:text-sm">
+            <div className="rounded-xl border border-red-200 bg-red-50
+                            text-red-700 px-3 py-2 text-xs sm:text-sm">
               {error}
             </div>
           )}
@@ -107,13 +150,26 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] text-sm sm:text-base font-semibold transition active:translate-y-px disabled:opacity-60"
+            className="mt-2 w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-2.5
+                       rounded-xl bg-[hsl(var(--primary))] 
+                       text-[hsl(var(--primary-foreground))] text-sm
+                       sm:text-base font-semibold transition
+                       active:translate-y-px disabled:opacity-60"
           >
             {loading ? 'در حال ورود…' : 'ورود'}
           </button>
         </form>
+
+        {/* register-test link for quick testing */}
+        <div className="mt-4 text-center">
+          <Link
+            to="/register"
+            className="text-[hsl(var(--primary))] hover:underline"
+          >
+            → برو به صفحه ثبت‌نام
+          </Link>
+        </div>
       </div>
     </div>
   )
 }
- 
