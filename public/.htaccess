@@ -1,21 +1,22 @@
-# Prefer serving index.html for SPA
-DirectoryIndex index.html index.php
+# public/.htaccess
+# Prefer serving index.php for SPA
+DirectoryIndex index.php index.html
 
 <IfModule mod_rewrite.c>
   Options -MultiViews
   RewriteEngine On
-  
+  RewriteBase /
+
   # Allow API and PHP requests to pass through unchanged
   RewriteRule ^api/ - [L]
   RewriteRule \.php$ - [L]
-
-  RewriteBase /bookstore/
 
   # If the requested file or directory exists, serve it directly
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
+  RewriteRule . /index.html [L]
 
-  # Redirect all other requests to index.html
-  RewriteRule ^ index.html [L]
+  # Redirect all other requests to index.php (React SPA entry point)
+  RewriteRule ^ index.php [QSA,L]
 </IfModule>

@@ -79,18 +79,5 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "vite": "^7.1.5"
-  },
-  "description": "**URL**: https://lovable.dev/projects/7e347454-3a64-4eea-addf-25c63848c4cd",
-  "main": "eslint.config.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mohammadsjahanbakhsh/palooza-menu-php.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/mohammadsjahanbakhsh/palooza-menu-php/issues"
-  },
-  "homepage": "https://github.com/mohammadsjahanbakhsh/palooza-menu-php#readme"
+  }
 }

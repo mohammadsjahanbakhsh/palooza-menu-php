@@ -3,7 +3,7 @@
         'name' => 'opensourcepos/opensourcepos',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'b326f2cd407303135f4c7111695632dfc82c8467',
+        'reference' => '8b5278d2c1904dad583af38968ab9a299b42a59f',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -388,7 +388,7 @@
         'opensourcepos/opensourcepos' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'b326f2cd407303135f4c7111695632dfc82c8467',
+            'reference' => '8b5278d2c1904dad583af38968ab9a299b42a59f',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

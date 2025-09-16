@@ -3,8 +3,9 @@
   "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
+    "forceConsistentCasingInFileNames": true,  // اجباری کردن حساسیت به حروف
+    "strict": true ,
+     "paths": { "@/*": ["./src/*"] }
     },
     "noImplicitAny": false,
     "noUnusedParameters": false,
@@ -13,4 +14,4 @@
     "noUnusedLocals": false,
     "strictNullChecks": false
   }
-}
+

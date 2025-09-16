@@ -12,7 +12,7 @@ final class GeneratedConfig
 	public const EXTENSIONS = array (
   'composer/pcre' => 
   array (
-    'install_path' => 'C:\\laragon\\www\\palooza\\vendor/composer/pcre',
+    'install_path' => 'C:\\laragon\\www\\bookstore\\vendor/composer/pcre',
     'relative_install_path' => '../../../composer/pcre',
     'extra' => 
     array (
@@ -26,7 +26,7 @@ final class GeneratedConfig
   ),
   'phpstan/phpstan-deprecation-rules' => 
   array (
-    'install_path' => 'C:\\laragon\\www\\palooza\\vendor/phpstan/phpstan-deprecation-rules',
+    'install_path' => 'C:\\laragon\\www\\bookstore\\vendor/phpstan/phpstan-deprecation-rules',
     'relative_install_path' => '../../phpstan-deprecation-rules',
     'extra' => 
     array (
@@ -40,7 +40,7 @@ final class GeneratedConfig
   ),
   'phpstan/phpstan-phpunit' => 
   array (
-    'install_path' => 'C:\\laragon\\www\\palooza\\vendor/phpstan/phpstan-phpunit',
+    'install_path' => 'C:\\laragon\\www\\bookstore\\vendor/phpstan/phpstan-phpunit',
     'relative_install_path' => '../../phpstan-phpunit',
     'extra' => 
     array (

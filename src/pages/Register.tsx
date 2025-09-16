@@ -1,5 +1,6 @@
 // src/pages/Register.tsx
-import React, { useState } from 'react'
+
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useToast } from '@/hooks/use-toast'
 import { apiFetch, ApiError, NetworkError } from '@/lib/api'
@@ -30,11 +31,21 @@ export default function Register(): JSX.Element {
     setLoading(true)
     try {
       const data = await apiFetch('register.php', {
-        method: 'POST',
-        body: JSON.stringify({ name, username, password, mobile, role }),
-      })
-      if (data.status !== 'success') throw new ApiError(200, data, data.message)
-      toast({ title: 'خوش آمدی به جمع ما!' })
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    name,
+    username,
+    password,
+    mobile,
+    role
+  })})
+
+      if (data.status !== 'success') {
+        throw new ApiError(200, data, data.message)
+      }
+
+      toast({ title: 'ثبت‌نام موفق', description: data.message })
       setStep('confirm')
     } catch (err: any) {
       handleError(err, 'ثبت‌نام ناموفق')
@@ -51,10 +62,21 @@ export default function Register(): JSX.Element {
     try {
       const data = await apiFetch('confirm-registration.php', {
         method: 'POST',
-        body: JSON.stringify({ adminUsername: adminUser, adminPassword: adminPass }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adminUsername: adminUser,
+          adminPassword: adminPass
+        }),
       })
-      if (data.status !== 'success') throw new ApiError(200, data, data.message)
-      toast({ title: 'کاربر تایید شد', description: 'اکنون می‌توانید وارد شوید' })
+
+      if (data.status !== 'success') {
+        throw new ApiError(200, data, data.message)
+      }
+
+      toast({
+        title: 'کاربر تأیید شد',
+        description: 'اکنون می‌توانید وارد شوید',
+      })
       navigate('/login')
     } catch (err: any) {
       handleError(err, 'احراز هویت ناموفق')
@@ -69,10 +91,10 @@ export default function Register(): JSX.Element {
     if (err instanceof NetworkError) msg = err.message
     else if (err instanceof ApiError) msg = err.data?.message || err.message
     else msg = err.message
+
     setError(msg)
     toast({ title, description: msg, variant: 'destructive' })
   }
-
   return (
     <div
       className="relative min-h-screen bg-center bg-cover px-4 py-8 sm:px-6 sm:py-12"
@@ -81,11 +103,7 @@ export default function Register(): JSX.Element {
     >
       <div className="absolute inset-0 bg-gray-900 bg-opacity-40" />
       <div className="relative z-10 mx-auto max-w-md bg-white bg-opacity-90 rounded-2xl p-8 flex flex-col">
-        <img
-          src={logo}
-          alt="لوگو"
-          className="w-20 h-20 mx-auto mb-6"
-        />
+        
 
         {step === 'form' ? (
           <form onSubmit={handleRegister} className="grid gap-4">
@@ -147,7 +165,7 @@ export default function Register(): JSX.Element {
         ) : (
           <form onSubmit={handleConfirm} className="grid gap-4">
             <h1 className="text-2xl font-bold text-center mb-2">
-              خوش آمدی به جمع ما!
+              خوش آمدید!
             </h1>
             <p className="text-center mb-4">
               لطفاً برای تأیید نهایی اطلاعات ادمین را وارد کنید
@@ -190,11 +208,8 @@ export default function Register(): JSX.Element {
           </Link>
         </p>
 
-        {/* لوگو پایین کارت */}
         <div className="flex justify-center mt-6">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full overflow-hidden border-4 border-[hsl(var(--primary))] flex items-center justify-center">
-            <img src={logo} alt="Bookstore Logo" className="w-full h-full object-cover" />
-          </div>
+          
         </div>
       </div>
     </div>

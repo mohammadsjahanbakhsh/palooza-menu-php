@@ -1,67 +1,57 @@
 <?php
-// اجازهٔ CORS و هدرها
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Content-Type");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-  http_response_code(204);
-  exit;
-}
+/**
+ * API Endpoint: Login
+ * Authenticates a user based on username and password.
+ */
 
-// JSON response
-header('Content-Type: application/json; charset=utf-8');
-session_start();
+// 1. Use the bootstrap file for a consistent setup
+require_once __DIR__ . '/bootstrap.php';
 
-// بارگذاری PDO
-require __DIR__ . '/../config/db.php';
-
-// خواندن ورودی JSON
+// 2. Get the input from the request body
 $input = json_decode(file_get_contents('php://input'), true);
-$username = trim($input['username']  ?? '');
-$password = trim($input['password']  ?? '');
+$username = $input['username'] ?? '';
+$password = $input['password'] ?? '';
 
-// اعتبارسنجی اولیه
-if ($username === '' || $password === '') {
-  http_response_code(400);
-  echo json_encode([
-    'status'  => 'error',
-    'message' => 'نام کاربری یا رمز عبور خالی است'
-  ], JSON_UNESCAPED_UNICODE);
-  exit;
+// 3. Basic validation
+if (empty($username) || empty($password)) {
+    http_response_code(400); // Bad Request
+    echo json_encode(['error' => 'Username and password are required.']);
+    exit();
 }
 
 try {
-  // جستجوی کاربر
-  $stmt = $pdo->prepare("
-    SELECT id, name, username, password, mobile, role
-    FROM system_users
-    WHERE username = ?
-    LIMIT 1
-  ");
-  $stmt->execute([$username]);
-  $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    // 4. Prepare and execute the query to find the user
+    $stmt = $pdo->prepare("
+        SELECT id, username, password, full_name, role 
+        FROM system_users 
+        WHERE username = ? AND is_active = 1
+    ");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
 
-  // بررسی رمز عبور
-  if ($user && password_verify($password, $user['password'])) {
-    unset($user['password']);    // حذف فیلد رمز قبل از خروجی
-    $_SESSION['user'] = $user;   // ذخیره در سشن (اختیاری)
+    // 5. Verify the user exists and the password is correct
+    // This securely compares the provided password with the hashed password in the database.
+    if ($user && password_verify($password, $user['password'])) {
+        
+        // IMPORTANT: Do not send the password hash back to the client!
+        unset($user['password']);
 
-    echo json_encode([
-      'status'  => 'success',
-      'message' => 'ورود موفق',
-      'user'    => $user
-    ], JSON_UNESCAPED_UNICODE);
-  } else {
-    http_response_code(401);
-    echo json_encode([
-      'status'  => 'error',
-      'message' => 'نام کاربری یا رمز عبور اشتباه است'
-    ], JSON_UNESCAPED_UNICODE);
-  }
+        // In a real production app, you would generate a JWT (JSON Web Token) here.
+        // For now, we return the user object.
+        echo json_encode([
+            'status' => 'success',
+            'user' => $user
+        ]);
+
+    } else {
+        // Use a generic error message for security
+        http_response_code(401); // Unauthorized
+        echo json_encode(['error' => 'Invalid username or password.']);
+    }
+
 } catch (PDOException $e) {
-  http_response_code(500);
-  echo json_encode([
-    'status'  => 'error',
-    'message' => 'خطا در اجرای کوئری پایگاه داده'
-  ], JSON_UNESCAPED_UNICODE);
+    // 6. Catch any database errors
+    http_response_code(500);
+    echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
 }
+?>

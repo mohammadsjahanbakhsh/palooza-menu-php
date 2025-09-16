@@ -1,22 +1,29 @@
-// vite.config.ts
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
+import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { dirname, resolve } from 'node:path'
 
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
-  resolve: { alias: { '@': resolve(__dirname, 'src') } },
   plugins: [react()],
-  base: '/',
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
   server: {
-    port: 3000,
     host: 'localhost',
-    strictPort: true,
-    
-        
-      
-}})
+    port: 8888,
+    proxy: {
+      '/api': {
+        target: 'http://bookstore.test',
+        changeOrigin: true,
+      },
+    },
+  },
+  build: {
+    outDir: '../public/assets',
+    emptyOutDir: true,
+  },
+})

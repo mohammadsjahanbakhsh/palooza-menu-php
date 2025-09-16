@@ -1,11 +1,12 @@
 <?php
+// api/get_tables.php
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+require_once __DIR__ . '/bootstrap.php';
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
-require __DIR__ . '/../config/db.php';
+
 header('Content-Type: application/json');
-require 'db.php';
 
 // واکشی سالن‌ها
 $stmtHalls = $pdo->prepare("SELECT id, name, floor FROM halls ORDER BY floor, id");
