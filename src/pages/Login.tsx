@@ -1,175 +1,163 @@
-// src/pages/Login.tsx
-import  { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { useToast } from '@/hooks/use-toast'
-import { apiFetch, ApiError, NetworkError } from '@/lib/api'
-import backgroundIndex from '../assets/backgroundindex.png'
+import { useState } from "react";
+import { useNavigate,Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Coffee, Lock, User } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import backgroundIndex from "@/assets/ravi.jpg";
+
+// import backgroundIndex from '../assets/backgroundindex.png'
 import logo from '../assets/bookstore-logo-BdxIlNK5.jpg'
+const Login = () => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-export default function Login(): JSX.Element {
-  const navigate = useNavigate()
-  const { toast } = useToast()
-
-  // form state
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  // handle login form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
-
-    try {
-      const data = await apiFetch('login.php', {
-        method: 'POST',
-        body: JSON.stringify({ username, password }),
-      })
-
-      // save logged-in user data
-      localStorage.setItem('currentUser', JSON.stringify(data.user))
-
-      // show success toast and redirect to dashboard
-      toast({ title: 'ورود موفق', description: 'خوش آمدید!' })
-      navigate('/dashboard')
-    } catch (err: any) {
-      if (err instanceof NetworkError) {
-        setError(err.message)
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    // Simulate login - In real app, this would connect to backend
+    setTimeout(() => {
+      if (username && password) {
+        localStorage.setItem('currentUser', JSON.stringify({
+          id: '1',
+          username,
+          name: username === 'admin' ? 'مدیر سیستم' : 'سالن‌دار',
+          role: username === 'admin' ? 'admin' : 'waiter'
+        }));
+        
         toast({
-          title: 'خطای شبکه',
-          description: err.message,
-          variant: 'destructive',
-        })
-      } else if (err instanceof ApiError) {
-        const msg = err.data?.message || err.message
-        setError(msg)
-        toast({
-          title: 'خطا در ورود',
-          description: msg,
-          variant: 'destructive',
-        })
+          title: "ورود موفق",
+          description: "به سامانه مدیریت کافه خوش آمدید",
+        });
+        
+        navigate("/dashboard");
       } else {
-        const msg = err.message || 'خطای ناشناخته، دوباره تلاش کنید.'
-        setError(msg)
         toast({
-          title: 'خطا در ورود',
-          description: msg,
-          variant: 'destructive',
-        })
+          title: "خطا در ورود",
+          description: "نام کاربری و رمز عبور را وارد کنید",
+          variant: "destructive"
+        });
       }
-    } finally {
-      setLoading(false)
-    }
-  }
+      setIsLoading(false);
+    }, 1000);
+  };
 
   return (
     <div
-      className="relative min-h-screen bg-center bg-cover px-4 py-8 sm:px-6 sm:py-12"
+      className="min-h-screen relative overflow-hidden"
       style={{ backgroundImage: `url(${backgroundIndex})` }}
       dir="rtl"
     >
-      {/* semi-transparent overlay */}
-      <div className="absolute inset-0 bg-gray-900 bg-opacity-40" />
+      <div className="absolute inset-0 bg-gradient-to-br from-background/90 via-coffee-dark/60 to-primary/80 backdrop-blur-[2px]"></div>
 
-      {/* login card */}
-      <div className="relative z-10 w-full max-w-sm sm:max-w-md lg:max-w-lg mx-auto
+      {/* Content */}
+      <div
+        className="relative z-10 w-full max-w-sm sm:max-w-md lg:max-w-lg mx-auto
                       bg-white bg-opacity-90 border border-white rounded-2xl
                       p-6 sm:p-10 flex flex-col items-center"
       >
-        {/* logo */}
-        <div className="flex justify-center mb-6">
-          <div
-            className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-white
-                       rounded-full overflow-hidden border-4
-                       border-[hsl(var(--primary))] flex items-center justify-center"
-          >
-            <img
-              src={logo}
-              alt="Bookstore Logo"
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </div>
-
-        {/* title */}
-        <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold mb-4
-                       text-[hsl(var(--foreground))] text-center"
-        >
-          ورود به سامانه
-        </h1>
-
-        {/* login form */}
-        <form onSubmit={handleSubmit} className="w-full grid gap-4">
-          <label className="grid gap-1">
-            <span className="text-sm sm:text-base text-[hsl(var(--foreground))]">
-              نام کاربری
-            </span>
-            <input
-              type="text"
-              placeholder="مثلاً: admin"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              required
-              className="w-full rounded-xl border border-[hsl(var(--input))] 
-                         bg-[hsl(var(--background))] px-3 py-2 sm:px-4
-                         sm:py-2.5 text-[hsl(var(--foreground))] text-sm 
-                         sm:text-base outline-none focus:ring-4
-                         focus:ring-[rgba(25,118,210,0.15)]
-                         focus:border-[hsl(var(--ring))]"
-            />
-          </label>
-
-          <label className="grid gap-1">
-            <span className="text-sm sm:text-base text-[hsl(var(--foreground))]">
-              رمز عبور
-            </span>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              className="w-full rounded-xl border border-[hsl(var(--input))] 
-                         bg-[hsl(var(--background))] px-3 py-2 sm:px-4
-                         sm:py-2.5 text-[hsl(var(--foreground))] text-sm 
-                         sm:text-base outline-none focus:ring-4
-                         focus:ring-[rgba(25,118,210,0.15)]
-                         focus:border-[hsl(var(--ring))]"
-            />
-          </label>
-
-          {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50
-                            text-red-700 px-3 py-2 text-xs sm:text-sm">
-              {error}
+        {" "}
+        <div className="w-full max-w-md space-y">
+          {/* Logo & Brand */}
+          <div className="text-center">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-300 rounded-2xl flex items-center justify-center shadow-floating mb-4">
+              <Coffee className="w-8 h-8 text-white" />{" "}
+              {/* رنگ آیکون کاپ را هم برای هماهنگی سفید کردم */}
             </div>
-          )}
+            <p className="text-cream mt-2 font-medium">کتاب فروشی راوی</p>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-[#FF8C00] to-[#FFA500] bg-clip-text text-transparent">
+              ravi bookstore
+            </h1>
+          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-2 w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-2.5
-                       rounded-xl bg-[hsl(var(--primary))] 
-                       text-[hsl(var(--primary-foreground))] text-sm
-                       sm:text-base font-semibold transition
-                       active:translate-y-px disabled:opacity-60"
-          >
-            {loading ? 'در حال ورود…' : 'ورود'}
-          </button>
-        </form>
+          {/* Login Form */}
+          <Card className="shadow-soft border-0 bg-card/80 backdrop-blur">
+            <CardHeader className="text-center pb-4">
+              <CardTitle className="text-2xl">ورود به سیستم</CardTitle>
+              
+            </CardHeader>
 
-        {/* register-test link for quick testing */}
-        <div className="mt-4 text-center">
-          <Link
-            to="/register"
-            className="text-[hsl(var(--primary))] hover:underline"
-          >
-            → برو به صفحه ثبت‌نام
-          </Link>
+            <CardContent>
+              <form onSubmit={handleLogin} className="space-y-2">
+                <div className="space-y-2">
+                  <Label htmlFor="username">نام کاربری</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className="pl-10 bg-background/50"
+                      placeholder="admin یا نام سالن‌دار"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password">رمز عبور</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-10 bg-background/50"
+                      placeholder="رمز عبور خود را وارد کنید"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-10 px-4 py-2 text-white text-sm font-medium rounded-md
+             bg-gradient-to-r from-orange-500 to-orange-300
+             hover:shadow-lg transition-all duration-300
+             inline-flex items-center justify-center"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "در حال ورود..." : "ورود"}
+                </Button>
+              </form>
+              <div className="mt-4 text-center">
+                <Link
+                  to="/register"
+                  className="text-[hsl(var(--primary))] hover:underline"
+                >
+                  برو به صفحه ثبت‌نام ←
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Demo Credentials */}
+          <Card className="bg-muted/50 border-accent/20">
+            <CardContent className="pt-6">
+              <p className="text-sm text-muted-foreground text-center mb-3">
+                حساب‌های تست:
+              </p>
+              <div className="text-xs space-y-1 text-center">
+                <div>
+                  <strong>ادمین:</strong> admin / 123123
+                </div>
+                <div>
+                  <strong>سالن‌دار:</strong> ؟؟؟؟؟
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
+
+export default Login;
