@@ -1,57 +1,40 @@
-<?php
-/**
- * API Endpoint: Login
- * Authenticates a user based on username and password.
- */
+// In src/pages/Login.tsx
 
-// 1. Use the bootstrap file for a consistent setup
-require_once __DIR__ . '/bootstrap.php';
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
+  
+  try {
+    const response = await fetch('/api/login.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
 
-// 2. Get the input from the request body
-$input = json_decode(file_get_contents('php://input'), true);
-$username = $input['username'] ?? '';
-$password = $input['password'] ?? '';
+    const data = await response.json();
 
-// 3. Basic validation
-if (empty($username) || empty($password)) {
-    http_response_code(400); // Bad Request
-    echo json_encode(['error' => 'Username and password are required.']);
-    exit();
-}
-
-try {
-    // 4. Prepare and execute the query to find the user
-    $stmt = $pdo->prepare("
-        SELECT id, username, password, full_name, role 
-        FROM system_users 
-        WHERE username = ? AND is_active = 1
-    ");
-    $stmt->execute([$username]);
-    $user = $stmt->fetch();
-
-    // 5. Verify the user exists and the password is correct
-    // This securely compares the provided password with the hashed password in the database.
-    if ($user && password_verify($password, $user['password'])) {
-        
-        // IMPORTANT: Do not send the password hash back to the client!
-        unset($user['password']);
-
-        // In a real production app, you would generate a JWT (JSON Web Token) here.
-        // For now, we return the user object.
-        echo json_encode([
-            'status' => 'success',
-            'user' => $user
-        ]);
-
+    if (response.ok && data.status === 'success') {
+      // Login was successful, save the REAL user object from the API
+      localStorage.setItem('currentUser', JSON.stringify(data.user));
+      
+      toast({
+        title: "ورود موفق",
+        description: `خوش آمدید, ${data.user.full_name}`,
+      });
+      
+      navigate("/dashboard");
     } else {
-        // Use a generic error message for security
-        http_response_code(401); // Unauthorized
-        echo json_encode(['error' => 'Invalid username or password.']);
+      // Login failed on the server
+      throw new Error(data.error || 'Invalid credentials.');
     }
-
-} catch (PDOException $e) {
-    // 6. Catch any database errors
-    http_response_code(500);
-    echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
-}
-?>
+  } catch (error) {
+    console.error("Login error:", error);
+    toast({
+      title: "خطا در ورود",
+      description: (error as Error).message,
+      variant: "destructive"
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};

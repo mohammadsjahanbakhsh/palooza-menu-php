@@ -14,13 +14,13 @@ const HallManagement = () => {
   const [halls, setHalls] = useState<Hall[]>([]);
   const [selectedHall, setSelectedHall] = useState<Hall | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: "", floor: 1 });
+  const [formData, setFormData] = useState({ name: "", floor_id: 1 });
   const { toast } = useToast();
 
   // 1. Function to fetch live data from your API
   const fetchHalls = async () => {
     try {
-      const response = await fetch('/api/get_halls.php');
+      const response = await fetch('/api/get_halls.php', { credentials: 'include'});
       if (!response.ok) throw new Error("Network response was not ok.");
       const data = await response.json();
       setHalls(data);
@@ -40,13 +40,13 @@ const HallManagement = () => {
 
   const handleAddHall = () => {
     setSelectedHall(null);
-    setFormData({ name: "", floor: 1 });
+    setFormData({ name: "", floor_id: 1 });
     setIsDialogOpen(true);
   };
 
   const handleEditHall = (hall: Hall) => {
     setSelectedHall(hall);
-    setFormData({ name: hall.name, floor: hall.floor_id });
+    setFormData({ name: hall.name, floor_id: hall.floor_id });
     setIsDialogOpen(true);
   };
 
@@ -64,7 +64,8 @@ const HallManagement = () => {
     
     // 3. Send delete request to your API
     try {
-      const response = await fetch(`/api/delete_hall.php?id=${hallId}`, { method: 'DELETE' });
+      const response = await fetch(`/api/delete_hall.php?id=${hallId}`,
+        { method: 'DELETE', credentials: 'include' });
       if (!response.ok) throw new Error("Failed to delete.");
       
       toast({ title: "سالن حذف شد", description: "سالن با موفقیت حذف شد" });
@@ -89,6 +90,7 @@ const HallManagement = () => {
 
     try {
       const response = await fetch(endpoint, {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: body,
@@ -109,8 +111,8 @@ const HallManagement = () => {
     }
   };
 
-  const getFloorLabel = (floor: number) => {
-    return floor === 1 ? "طبقه اول" : "طبقه دوم";
+  const getfloor_idLabel = (floor_id: number) => {
+    return floor_id === 1 ? "طبقه اول" : "طبقه دوم";
   };
 
   return (
@@ -144,10 +146,10 @@ const HallManagement = () => {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="hall-floor">طبقه</Label>
+                <Label htmlFor="hall-floor_id">طبقه</Label>
                 <Select 
-                  value={formData.floor.toString()} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, floor: parseInt(value) }))}
+                  value={formData.floor_id.toString()} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, floor_id: parseInt(value) }))}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="انتخاب طبقه" />
@@ -182,7 +184,7 @@ const HallManagement = () => {
                   {hall.name}
                 </CardTitle>
                 <Badge variant="secondary">
-                  {getFloorLabel(hall.floor_id)}
+                  {getfloor_idLabel(hall.floor_id)}
                 </Badge>
               </div>
             </CardHeader>

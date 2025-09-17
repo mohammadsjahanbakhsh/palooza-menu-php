@@ -1,4 +1,6 @@
-import { useState } from "react";
+// component/MenuItem.tsx
+
+import { useState, useEffect } from "react";
 import { MenuItem as MenuItemType, OrderItem } from "@/types/cafe";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,18 +19,39 @@ const MenuItem = ({ item, onAddToOrder, currentQuantity = 0, className }: MenuIt
   const [quantity, setQuantity] = useState(currentQuantity);
   const [notes, setNotes] = useState("");
 
-  const handleQuantityChange = (newQuantity: number) => {
-    if (newQuantity < 0) return;
-    setQuantity(newQuantity);
-    
-    if (newQuantity > 0) {
+  // ✅ 1. Sync local quantity with the prop from the parent
+  // This ensures if the cart is cleared, the quantity here resets to 0.
+  useEffect(() => {
+    setQuantity(currentQuantity);
+  }, [currentQuantity]);
+
+  // ✅ 2. Sync notes with the parent whenever they change
+  // This is the main bug fix.
+  useEffect(() => {
+    // Only update the parent if the item is actually in the cart
+    if (quantity > 0) {
       onAddToOrder({
-        id: `${item.id}-${Date.now()}`,
+        id: `${item.id}-${notes}`, // Create a more stable ID based on notes
         menuItem: item,
-        quantity: newQuantity,
-        notes,
+        quantity: quantity,
+        notes: notes,
       });
     }
+    // We add 'item', 'quantity', and 'onAddToOrder' to the dependency array
+    // to follow React's best practices, even though we only expect 'notes' to trigger it.
+  }, [notes, item, quantity, onAddToOrder]);
+
+
+  const handleQuantityChange = (newQuantity: number) => {
+    if (newQuantity < 0) return;
+    
+    // We still update the quantity immediately on click
+    onAddToOrder({
+      id: `${item.id}-${notes}`,
+      menuItem: item,
+      quantity: newQuantity,
+      notes,
+    });
   };
 
   const formatPrice = (price: number) => {
@@ -56,7 +79,6 @@ const MenuItem = ({ item, onAddToOrder, currentQuantity = 0, className }: MenuIt
               )}
             </div>
           </div>
-          
           <Coffee className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-1" />
         </div>
 
@@ -72,11 +94,9 @@ const MenuItem = ({ item, onAddToOrder, currentQuantity = 0, className }: MenuIt
             >
               <Minus className="w-3 h-3" />
             </Button>
-            
             <span className="w-8 text-center font-medium">
               {quantity}
             </span>
-            
             <Button
               variant="default"
               size="sm"
@@ -86,7 +106,6 @@ const MenuItem = ({ item, onAddToOrder, currentQuantity = 0, className }: MenuIt
               <Plus className="w-3 h-3" />
             </Button>
           </div>
-          
           {quantity > 0 && (
             <div className="text-sm font-medium text-primary">
               {formatPrice(item.price * quantity)}

@@ -1,3 +1,5 @@
+// /components/TableManagement.tsx
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,13 +9,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit2, Trash2, Users, Table as TableIcon } from "lucide-react";
-
 import { Hall, Table, TableStatus } from "@/types/cafe";
-import { useToast } from "@/hooks/use-toast"; // فرض شده این هوک به درستی کار می‌کند
+import { useToast } from "@/hooks/use-toast";
 
-// کامپوننت اصلی
 const TableManagement = () => {
-  // --- State Hooks ---
   const [halls, setHalls] = useState<Hall[]>([]);
   const [selectedTable, setSelectedTable] = useState<(Table & { hallName?: string }) | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -21,15 +20,13 @@ const TableManagement = () => {
     name: "",
     capacity: 2,
     hallId: "",
-    status: "empty" as TableStatus,
+    status: "free" as TableStatus,
   });
   const { toast } = useToast();
 
-  // --- Data Fetching ---
   const fetchData = async () => {
     try {
-      // این آدرس باید به API شما که لیست تمام سالن‌ها و میزهایشان را برمی‌گرداند، اشاره کند
-      const response = await fetch('/api/get_halls.php'); // آدرس API خود را وارد کنید
+      const response = await fetch('/api/get_halls.php',{credentials: 'include'});
       if (!response.ok) throw new Error("Network response was not ok.");
       const data: Hall[] = await response.json();
       setHalls(data);
@@ -43,15 +40,13 @@ const TableManagement = () => {
     }
   };
 
-  // --- Effects ---
   useEffect(() => {
-    fetchData(); // یک بار در زمان لود شدن کامپوننت، اطلاعات را از سرور بگیر
+    fetchData();
   }, []);
 
-  // --- Event Handlers ---
   const handleAddTable = () => {
     setSelectedTable(null);
-    setFormData({ name: "", capacity: 2, hallId: "", status: "empty" });
+    setFormData({ name: "", capacity: 2, hallId: "", status: "free" });
     setIsDialogOpen(true);
   };
 
@@ -67,73 +62,64 @@ const TableManagement = () => {
   };
   
   const handleDeleteTable = async (tableId: string) => {
-    // منطق حذف میز از سرور
     try {
       const response = await fetch('/api/delete_table.php', {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: tableId }),
       });
       if (!response.ok) throw new Error("Failed to delete table");
       toast({ title: "میز حذف شد", description: "میز با موفقیت از سیستم حذف شد." });
-      fetchData(); // رفرش کردن لیست میزها
+      fetchData();
     } catch (error) {
       toast({ title: "خطا در حذف", description: "ارتباط با سرور برای حذف میز ناموفق بود.", variant: "destructive" });
     }
   };
 
-
   const handleSubmit = async () => {
-    // 1. اعتبارسنجی ورودی‌ها
     if (!formData.name.trim() || !formData.hallId) {
       toast({ title: "خطا در ثبت", description: "نام میز و انتخاب سالن الزامی است", variant: "destructive" });
       return;
     }
 
-    // 2. تعیین اینکه در حال ویرایش هستیم یا افزودن
     const isEditing = !!selectedTable;
     const endpoint = isEditing ? '/api/update_table.php' : '/api/create_table.php';
-
-    // 3. آماده‌سازی داده‌ها برای ارسال به سرور
     const body = JSON.stringify({
-      id: isEditing ? selectedTable.id : undefined, // آیدی میز فقط در صورت ویرایش
+      id: isEditing ? selectedTable.id : undefined,
       ...formData,
     });
 
-    // 4. ارسال درخواست به سرور
     try {
       const response = await fetch(endpoint, {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: body,
       });
       if (!response.ok) throw new Error("Failed to save table");
-
       toast({
         title: isEditing ? "میز بروزرسانی شد" : "میز اضافه شد",
         description: "اطلاعات با موفقیت در دیتابیس ذخیره شد",
       });
-
-      fetchData(); // داده‌ها را از سرور مجدداً دریافت کن
-      setIsDialogOpen(false); // بستن دیالوگ
-
+      fetchData();
+      setIsDialogOpen(false);
     } catch(error) {
       toast({ title: "خطا در ذخیره‌سازی", description: "ارتباط با سرور با مشکل مواجه شد", variant: "destructive" });
     }
   };
 
-  // --- Helper Functions ---
   const getStatusLabel = (status: TableStatus) => ({
-    empty: "خالی",
+    free: "خالی",
     reserved: "رزرو شده",
-    occupied: "در حال سرویس",
+    serving: "در حال سرویس",
     paid: "تسویه شده",
   }[status]);
 
   const getStatusColor = (status: TableStatus) => ({
-    empty: "bg-green-500", // رنگ‌های بهتر برای وضعیت‌ها
+    free: "bg-green-500",
     reserved: "bg-yellow-500",
-    occupied: "bg-blue-500",
+    serving: "bg-blue-500",
     paid: "bg-purple-500",
   }[status]);
   
@@ -148,11 +134,8 @@ const TableManagement = () => {
   
   const allTables = getAllTables(halls);
 
-  // --- JSX Return ---
-  // این بخش باید آخرین قسمت در کامپوننت باشد
   return (
     <div className="space-y-6">
-      {/* Add Table Button & Dialog */}
       <div className="flex justify-end">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -166,9 +149,7 @@ const TableManagement = () => {
               <DialogTitle>{selectedTable ? "ویرایش میز" : "افزودن میز جدید"}</DialogTitle>
               <DialogDescription>اطلاعات میز را وارد کنید.</DialogDescription>
             </DialogHeader>
-
             <div className="grid gap-4 py-4">
-              {/* Table Name Input */}
               <div className="grid gap-2">
                 <Label htmlFor="table-name">نام میز</Label>
                 <Input
@@ -178,8 +159,6 @@ const TableManagement = () => {
                   placeholder="مثال: A1"
                 />
               </div>
-
-              {/* Capacity Select */}
               <div className="grid gap-2">
                 <Label htmlFor="table-capacity">ظرفیت</Label>
                 <Select
@@ -195,8 +174,6 @@ const TableManagement = () => {
                   </SelectContent>
                 </Select>
               </div>
-
-              {/* Hall Select */}
               <div className="grid gap-2">
                 <Label htmlFor="table-hall">سالن</Label>
                 <Select
@@ -213,8 +190,6 @@ const TableManagement = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
-              {/* Status Select (Only for editing) */}
               {selectedTable && (
                  <div className="grid gap-2">
                     <Label htmlFor="table-status">وضعیت</Label>
@@ -224,16 +199,15 @@ const TableManagement = () => {
                     >
                       <SelectTrigger><SelectValue placeholder="انتخاب وضعیت" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="empty">خالی</SelectItem>
+                        <SelectItem value="free">خالی</SelectItem>
                         <SelectItem value="reserved">رزرو شده</SelectItem>
-                        <SelectItem value="occupied">در حال سرویس</SelectItem>
+                        <SelectItem value="serving">در حال سرویس</SelectItem>
                         <SelectItem value="paid">تسویه شده</SelectItem>
                       </SelectContent>
                     </Select>
                 </div>
               )}
             </div>
-            
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>انصراف</Button>
               <Button onClick={handleSubmit}>{selectedTable ? "بروزرسانی" : "افزودن"}</Button>
@@ -241,8 +215,6 @@ const TableManagement = () => {
           </DialogContent>
         </Dialog>
       </div>
-
-      {/* Tables List */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {allTables.map((table) => (
           <Card key={table.id} className="relative">
@@ -270,8 +242,6 @@ const TableManagement = () => {
           </Card>
         ))}
       </div>
-
-      {/* Empty State */}
       {allTables.length === 0 && (
         <div className="text-center py-12 col-span-full">
           <TableIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -282,5 +252,4 @@ const TableManagement = () => {
     </div>
   );
 };
-
 export default TableManagement;

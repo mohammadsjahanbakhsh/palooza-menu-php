@@ -14,7 +14,7 @@ export interface Hall {
   floor_id: number;
   tables: Table[];
 }
-export type TableStatus = 'empty' | 'reserved' | 'occupied' | 'paid';
+export type TableStatus = 'free' | 'reserved' | 'serving' | 'paid';
 
 export interface Table {
   id: string;

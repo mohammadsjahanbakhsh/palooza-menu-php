@@ -18,5 +18,5 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 // بارگذاری PDO
 require __DIR__ . '/../config/db.php';
-$pdo->exec(statement: "SET NAMES utf8mb4");
+// $pdo->exec(statement: "SET NAMES utf8mb4");
 

@@ -1,57 +1,39 @@
 <?php
-// Set the content type to JSON for the response
-header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: DELETE");
-header("Access-Control-Allow-Origin: *"); // For development only. In production, restrict this to your domain.
-
-// 1. Include your database connection file
+// /api/create_table.php
 require_once __DIR__ . '/bootstrap.php';
+$input = json_decode(file_get_contents('php://input'), true);
 
-// 2. Check for the correct HTTP method (DELETE)
-if ($_SERVER['REQUEST_METHOD'] !== 'DELETE') {
-    http_response_code(405); // Method Not Allowed
-    echo json_encode(['message' => 'Method Not Allowed.']);
+// 💡 Improved Validation: Check for 'hallId' (camelCase) to match the frontend.
+// Also, ensure the name is a non-empty string after trimming whitespace.
+if (
+    !isset($input['name'], $input['capacity'], $input['hallId']) ||
+    trim($input['name']) === ''
+) {
+    http_response_code(400);
+    echo json_encode(['error' => 'A non-empty name, capacity, and hallId are required.']);
     exit();
 }
 
-// 3. Get the table ID from the URL query parameter
-if (!isset($_GET['id'])) {
-    http_response_code(400); // Bad Request
-    echo json_encode(['message' => 'Table ID is missing.']);
-    exit();
+try {
+    // The database column is likely 'hall_id' (snake_case)
+    $sql = "INSERT INTO tables (name, capacity, hall_id, status) VALUES (?, ?, ?, 'free')";
+    $stmt = $pdo->prepare($sql);
+    
+    // Note: We use $input['hallId'] from the request
+    $stmt->execute([$input['name'], $input['capacity'], $input['hallId']]);
+    
+    $newTableId = $pdo->lastInsertId();
+    
+    // ✅ Best Practice: Return a 201 Created status code for successful creation.
+    http_response_code(201); 
+    echo json_encode([
+        'status' => 'success', 
+        'message' => 'Table created successfully.', 
+        'id' => $newTableId
+    ]);
+
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
 }
-$tableId = $_GET['id'];
-
-// 4. Prepare the SQL statement to prevent SQL injection
-$sql = "DELETE FROM tables WHERE id = ?";
-
-$stmt = $conn->prepare($sql);
-
-if ($stmt === false) {
-    http_response_code(500); // Internal Server Error
-    echo json_encode(['message' => 'Failed to prepare the SQL statement.']);
-    exit();
-}
-
-// 5. Bind the parameter and execute the query
-$stmt->bind_param("s", $tableId); // "s" means the parameter is a string
-
-if ($stmt->execute()) {
-    // 6. Check if a row was actually deleted
-    if ($stmt->affected_rows > 0) {
-        http_response_code(200); // OK
-        echo json_encode(['message' => 'Table deleted successfully.']);
-    } else {
-        http_response_code(404); // Not Found
-        echo json_encode(['message' => 'Table not found or already deleted.']);
-    }
-} else {
-    http_response_code(500); // Internal Server Error
-    echo json_encode(['message' => 'Failed to execute the query.']);
-}
-
-// 7. Close the statement and connection
-$stmt->close();
-$conn->close();
-
 ?>

@@ -12,9 +12,9 @@ interface TableGridProps {
 
 // A helper object for styling based on status
 const statusStyles: { [key in TableStatus]: { style: string; label: string } } = {
-  empty:    { style: "bg-green-500 text-white", label: "خالی" },
+  free:    { style: "bg-green-500 text-white", label: "خالی" },
   reserved: { style: "bg-yellow-500 text-white", label: "رزرو شده" },
-  occupied: { style: "bg-red-500 text-white", label: "در حال سرویس" },
+  serving: { style: "bg-red-500 text-white", label: "در حال سرویس" },
   paid:     { style: "bg-blue-500 text-white", label: "تسویه شده" },
 };
 

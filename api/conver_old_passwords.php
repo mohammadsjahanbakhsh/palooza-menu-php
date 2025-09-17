@@ -1,32 +1,69 @@
 <?php
-require_once __DIR__ . '/bootstrap.php';
-header('Content-Type: text/plain; charset=utf-8'); // خروجی متنی UTF-8
+/**
+ * ONE-TIME ADMINISTRATIVE SCRIPT
+ *
+ * This script finds users with plain-text passwords and securely hashes them.
+ * It is a sensitive tool and must be run by an authenticated admin.
+ *
+ * ⚠️ SECURITY WARNING: After running this successfully one time,
+ * you MUST DELETE IT from your server.
+ */
 
-$pdo->exec("SET NAMES utf8mb4");
+// 1. Use the bootstrap file for a consistent setup (DB, CORS, etc.)
+require_once __DIR__ . '/bootstrap.php';
+
+// 2. Get the admin's credentials from the request body to authorize this action
+$input = json_decode(file_get_contents('php://input'), true);
+$adminUsername = $input['adminUsername'] ?? '';
+$adminPassword = $input['adminPassword'] ?? '';
+
+// Basic validation
+if (empty($adminUsername) || empty($adminPassword)) {
+    http_response_code(400); // Bad Request
+    echo json_encode(['error' => 'Admin username and password are required to run this script.']);
+    exit();
+}
 
 try {
-    // گرفتن همه کاربران
-    $stmt = $pdo->query("SELECT id, username, password FROM system_users");
-    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // 3. Authenticate the admin user
+    $stmt = $pdo->prepare("SELECT password, role FROM system_users WHERE username = ?");
+    $stmt->execute([$adminUsername]);
+    $admin = $stmt->fetch();
+
+    // Verify the admin exists, their password is correct, and their role is 'admin'
+    // This assumes the admin's own password is ALREADY hashed.
+    if (!$admin || !password_verify($adminPassword, $admin['password']) || $admin['role'] !== 'admin') {
+        http_response_code(401); // Unauthorized
+        echo json_encode(['error' => 'Invalid admin credentials or insufficient permissions.']);
+        exit();
+    }
+
+    // 4. Find all users to check their passwords
+    $stmt = $pdo->query("SELECT id, password FROM system_users");
+    $users = $stmt->fetchAll();
 
     $updatedCount = 0;
+    $updateStmt = $pdo->prepare("UPDATE system_users SET password = ? WHERE id = ?");
 
     foreach ($users as $user) {
-        $info = password_get_info($user['password']);
-        if (!$info['algo']) { // یعنی هش نیست
-            $hashed = password_hash($user['password'], PASSWORD_DEFAULT);
-            $updateStmt = $pdo->prepare("UPDATE system_users SET password = :p WHERE id = :id");
-            $updateStmt->execute([
-                ':p' => $hashed,
-                ':id' => $user['id']
-            ]);
-            echo "✅ کاربر {$user['username']} هش شد.\n";
+        // Check if the password is NOT already hashed (algo will be 0 for plain text)
+        if (password_get_info($user['password'])['algo'] === 0) {
+            $hashedPassword = password_hash($user['password'], PASSWORD_BCRYPT);
+            $updateStmt->execute([$hashedPassword, $user['id']]);
             $updatedCount++;
         }
     }
 
-    echo "تمام شد! {$updatedCount} رمز قدیمی به هش تبدیل شد.\n";
+    // 5. Send a success response
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Password hashing process completed.',
+        'updated_users_count' => $updatedCount
+    ]);
 
 } catch (PDOException $e) {
-    echo "❌ خطا: " . $e->getMessage();
+    // 6. Catch any database errors
+    http_response_code(500);
+    echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
 }
+?>

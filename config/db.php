@@ -4,7 +4,7 @@
 $host    = 'localhost';
 $db      = 'bookstore';
 $user    = 'root';
-$pass    = '';           // اگر دیتابیس پسورد ندارد، خالی بگذارید
+$pass    = '';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
@@ -16,8 +16,8 @@ $options = [
 
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
-    $pdo->exec("SET NAMES utf8mb4"); // ← حالا بعد از تعریف PDO اجرا می‌شه
-    return $pdo;
+    // return $pdo; // ⛔️ این خط حذف شود
+
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode([

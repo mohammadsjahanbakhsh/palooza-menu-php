@@ -65,7 +65,8 @@ export default function Register(): JSX.Element {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           adminUsername: adminUser,
-          adminPassword: adminPass
+          adminPassword: adminPass ,
+          usernameToConfirm: username
         }),
       })
 

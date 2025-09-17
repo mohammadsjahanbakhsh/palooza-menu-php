@@ -1,17 +1,18 @@
+// tfconfig.json
 {
   "files": [],
-  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ],
   "compilerOptions": {
     "baseUrl": ".",
-    "forceConsistentCasingInFileNames": true,  // اجباری کردن حساسیت به حروف
-    "strict": true ,
-     "paths": { "@/*": ["./src/*"] }
+    "paths": {
+      "@/*": ["./src/*"]
     },
-    "noImplicitAny": false,
-    "noUnusedParameters": false,
-    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "allowJs": true,
-    "noUnusedLocals": false,
-    "strictNullChecks": false
+    "skipLibCheck": true
   }
-
+}
