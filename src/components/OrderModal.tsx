@@ -164,15 +164,16 @@ const OrderModal = ({ table, open, onClose, onDataRefresh, currentUser }: OrderM
                   <UserIcon className="w-4 h-4" />
                   ظرفیت {table.capacity} نفر
                 </span>
-                <Badge>
-                  {
-                    {
-                      'free': 'خالی',
-                      'reserved': 'رزرو',
-                      'serving': 'در حال سرویس',
-                      'paid': 'تسویه شده'
-                    }[table.status]
-                  }
+                <Badge variant={
+                  table.status === 'free' ? 'default' :
+                  table.status === 'serving' ? 'destructive' :
+                  table.status === 'reserved' ? 'secondary' : 'outline'}>
+                  
+                    {table.status === 'free' && 'خالی'}
+                  {table.status === 'serving' && 'اشغال'}
+                  {table.status === 'reserved' && 'رزرو'}
+                  {table.status === 'paid' && 'تسویه شده'}
+                  
                 </Badge>
               </DialogDescription>
             </div>
@@ -188,7 +189,7 @@ const OrderModal = ({ table, open, onClose, onDataRefresh, currentUser }: OrderM
             <h3 className="text-lg font-semibold mb-4">منو</h3>
             <Tabs defaultValue={menuCategories[0]?.id.toString() || '1'}>
               <ScrollArea className="w-full whitespace-nowrap">
-                <TabsList>
+                <TabsList className="grid w-full grid-cols-6 lg:grid-cols-8">
                   {menuCategories.map((category) => (
                     <TabsTrigger key={category.id} value={category.id.toString()}>
                       {category.name}
@@ -227,7 +228,7 @@ const OrderModal = ({ table, open, onClose, onDataRefresh, currentUser }: OrderM
               <Label htmlFor="customer-phone">شماره تلفن مشتری (اختیاری)</Label>
               <Input id="customer-phone" placeholder="مثال: 09123456789" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
             </div>
-            <ScrollArea className="flex-1 max-h-96">
+            <ScrollArea className="flex-1 max-h-90">
               {currentOrder.length === 0 ? (
                 <div className="text-center text-muted-foreground py-8">
                   <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-50" />

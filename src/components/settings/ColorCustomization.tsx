@@ -9,18 +9,18 @@ import { useToast } from "@/hooks/use-toast";
 
 // Interface for the color scheme
 interface ColorScheme {
-  tableEmpty: string;
+  tableFree: string;
   tableReserved: string;
-  tableOccupied: string;
+  tableServing: string;
   tablePaid: string;
 }
 
 // ✅ تغییر اصلی اینجاست: رنگ‌های پیش‌فرض با مقادیر درخواستی شما جایگزین شدند
 const defaultColors: ColorScheme = {
-  tableEmpty:    "153 31% 86%", //  خالی: #D1E7DD
+  tableFree:    "153 31% 86%", //  خالی: #D1E7DD
   tablePaid:     "189 53% 88%", //  تسویه شده: #D1ECF1
   tableReserved: "46 100% 90%", //  رزرو شده: #FFF3CD
-  tableOccupied: "355 70% 91%", //  در حال سرویس: #F8D7DA
+  tableServing: "355 70% 91%", //  در حال سرویس: #F8D7DA
 };
 
 const ColorCustomization = () => {
@@ -36,7 +36,7 @@ const ColorCustomization = () => {
         const response = await fetch('/api/get_color_settings.php', { credentials: 'include' });
         if (!response.ok) throw new Error("Failed to fetch colors.");
         const savedColors = await response.json();
-        if (savedColors && savedColors.tableEmpty) { // Check if data is valid
+        if (savedColors && savedColors.tableFree) { // Check if data is valid
           setColors(savedColors);
           setTempColors(savedColors);
           applyColorsToCSS(savedColors); // Apply loaded colors immediately
@@ -107,9 +107,9 @@ const ColorCustomization = () => {
 
   const applyColorsToCSS = (colorsToApply: ColorScheme) => {
     const root = document.documentElement;
-    root.style.setProperty('--table-empty', colorsToApply.tableEmpty);
+    root.style.setProperty('--table-free', colorsToApply.tableFree);
     root.style.setProperty('--table-reserved', colorsToApply.tableReserved);
-    root.style.setProperty('--table-occupied', colorsToApply.tableOccupied);
+    root.style.setProperty('--table-serving', colorsToApply.tableServing);
     root.style.setProperty('--table-paid', colorsToApply.tablePaid);
   };
 
@@ -147,9 +147,9 @@ const ColorCustomization = () => {
   };
 
   const colorConfigs = [
-    { key: 'tableEmpty' as keyof ColorScheme, label: 'میز خالی', description: 'رنگ میزهای خالی و آماده استفاده' },
+    { key: 'tableFree' as keyof ColorScheme, label: 'میز خالی', description: 'رنگ میزهای خالی و آماده استفاده' },
     { key: 'tableReserved' as keyof ColorScheme, label: 'میز رزرو شده', description: 'رنگ میزهای رزرو شده' },
-    { key: 'tableOccupied' as keyof ColorScheme, label: 'در حال سرویس', description: 'رنگ میزهای در حال سرویس' },
+    { key: 'tableServing' as keyof ColorScheme, label: 'در حال سرویس', description: 'رنگ میزهای در حال سرویس' },
     { key: 'tablePaid' as keyof ColorScheme, label: 'تسویه شده', description: 'رنگ میزهای تسویه شده' }
   ];
 

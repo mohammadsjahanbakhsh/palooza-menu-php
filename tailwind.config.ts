@@ -1,7 +1,8 @@
 // tailwind.config.ts
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from 'tailwindcss-animate';
 
-export default {
+const config = {
   darkMode: ["class"],
   content: [
     "./index.html",
@@ -48,9 +49,6 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        "table-available": "hsl(var(--table-available))",
-        "table-occupied": "hsl(var(--table-occupied))",
-        "table-hover": "hsl(var(--table-hover))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -61,6 +59,11 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // ✅ بخش رنگ‌های میز اضافه و اصلاح شد
+        'table-free': 'hsl(var(--table-free, 142 76% 41%))',
+        'table-serving': 'hsl(var(--table-serving, 0 84% 60%))',
+        'table-reserved': 'hsl(var(--table-reserved, 47 95% 53%))',
+        'table-paid': 'hsl(var(--table-paid, 221 83% 53%))',
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -70,12 +73,31 @@ export default {
       keyframes: {
         "accordion-down": { from: { height: "0" }, to: { height: "var(--radix-accordion-content-height)" } },
         "accordion-up": { from: { height: "var(--radix-accordion-content-height)" }, to: { height: "0" } },
+        "subtle-pulse": {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(74, 222, 128, 0.4)' },
+          '50%': { boxShadow: '0 0 0 10px rgba(74, 222, 128, 0)' },
+        },
+        shake: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '25%': { transform: 'translateX(-5px)' },
+          '75%': { transform: 'translateX(5px)' },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        'subtle-pulse': 'subtle-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        // ✅ کلاس انیمیشن shake اضافه شد
+        'shake': 'shake 0.3s ease-in-out',
+      },
+      fontSize: {
+        'fluid-lg': 'clamp(1rem, 2.5vw, 1.25rem)',
+        'fluid-base': 'clamp(0.75rem, 2vw, 0.875rem)',
+        'fluid-xs': 'clamp(0.65rem, 1.5vw, 0.75rem)',
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 } satisfies Config;
+
+export default config;

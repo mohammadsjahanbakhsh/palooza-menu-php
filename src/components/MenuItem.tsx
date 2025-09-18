@@ -57,8 +57,7 @@ const MenuItem = ({ item, onAddToOrder, currentQuantity = 0, className }: MenuIt
   const formatPrice = (price: number) => {
     return (price / 1000).toLocaleString() + " تومان";
   };
-
-  return (
+return (
     <Card className={cn("hover:shadow-soft transition-all duration-300 border-0 bg-card/60 backdrop-blur-sm", className)}>
       <CardContent className="p-4">
         {/* Header */}
@@ -79,6 +78,7 @@ const MenuItem = ({ item, onAddToOrder, currentQuantity = 0, className }: MenuIt
               )}
             </div>
           </div>
+          
           <Coffee className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-1" />
         </div>
 
@@ -94,9 +94,11 @@ const MenuItem = ({ item, onAddToOrder, currentQuantity = 0, className }: MenuIt
             >
               <Minus className="w-3 h-3" />
             </Button>
+            
             <span className="w-8 text-center font-medium">
               {quantity}
             </span>
+            
             <Button
               variant="default"
               size="sm"
@@ -106,6 +108,7 @@ const MenuItem = ({ item, onAddToOrder, currentQuantity = 0, className }: MenuIt
               <Plus className="w-3 h-3" />
             </Button>
           </div>
+          
           {quantity > 0 && (
             <div className="text-sm font-medium text-primary">
               {formatPrice(item.price * quantity)}
@@ -129,5 +132,4 @@ const MenuItem = ({ item, onAddToOrder, currentQuantity = 0, className }: MenuIt
     </Card>
   );
 };
-
 export default MenuItem;

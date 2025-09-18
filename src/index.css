@@ -33,9 +33,9 @@
     --destructive-foreground: 30 8% 97%;
 
     /* Table Status Colors - Easy to customize */
-    --table-empty: 120 70% 50%;      /* Green - خالی */
+    --table-free: 120 70% 50%;      /* Green - خالی */
     --table-reserved: 45 100% 50%;   /* Yellow - رزرو */
-    --table-occupied: 0 80% 55%;     /* Red - در حال سرویس */
+    --table-serving: 0 80% 55%;     /* Red - در حال سرویس */
     --table-paid: 210 100% 60%;      /* Blue - تسویه شده */
 
     /* Cafe Atmosphere Colors */
@@ -100,9 +100,9 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 30 8% 95%;
 
-    --table-empty: 120 60% 45%;
+    --table-free: 120 60% 45%;
     --table-reserved: 45 90% 55%;
-    --table-occupied: 0 75% 50%;
+    --table-serving: 0 75% 50%;
     --table-paid: 210 90% 55%;
 
     --coffee-dark: 25 40% 15%;

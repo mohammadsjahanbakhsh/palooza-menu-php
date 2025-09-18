@@ -16,7 +16,7 @@ try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$input['color_hex'], $input['status_key']]);
 
-    echo json_encode(['status' => 'success', 'message' => 'Style updated successfully.']);
+    echo json_encode(['status' => 'success', 'message' => 'رنگ میزها با موفقیت تغییر کرد']);
 
 } catch (PDOException $e) {
     http_response_code(500);

@@ -52,9 +52,9 @@ export default {
     },
     // ✅ این بخش را با دقت جایگزین کنید
     table: {
-      empty: 'hsl(var(--table-empty))',
+      free: 'hsl(var(--table-free))',
       reserved: 'hsl(var(--table-reserved))',
-      occupied: 'hsl(var(--table-occupied))',
+      serving: 'hsl(var(--table-serving))',
       paid: 'hsl(var(--table-paid))',
     }
       },
