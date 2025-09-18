@@ -106,9 +106,7 @@ const MenuItem = ({ item, orderItem, onUpdate }: MenuItemProps) => {
 
 interface ApiOrderItem {
   id: number;
-  item_id: string;
-  item_name: string;
-  price: string;
+  menu_item_id: string; // Changed from item_id
   quantity: number;
   notes?: string;
 }
@@ -126,41 +124,63 @@ const OrderModal = ({ table, open, onClose, onDataRefresh, currentUser }: OrderM
   const [menuItems, setMenuItems] = useState<MenuItemType[]>([]);
   const [currentOrder, setCurrentOrder] = useState<OrderItem[]>([]);
   const [customerPhone, setCustomerPhone] = useState('');
+  const [customerName, setCustomerName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [currentFactorId, setCurrentFactorId] = useState<number | null>(null); // To store the current factor ID
   const { toast } = useToast();
 
   useEffect(() => {
     const loadInitialData = async () => {
       if (!open || !table) return;
       setIsLoading(true);
+      
       try {
+        // Fetch menu data regardless of table status
         const menuResponse = await fetch('/api/get_menu_data.php', { credentials: 'include' });
         const menuData: { categories: MenuCategory[], items: MenuItemType[] } = await menuResponse.json();
         setMenuCategories(menuData.categories);
         setMenuItems(menuData.items);
 
-        if (table.status === 'serving' && table.currentOrder) {
-          const orderResponse = await fetch(`/api/get_order_by_factor.php?factor_id=${table.currentOrder.id}`, { credentials: 'include' });
-          const orderData = await orderResponse.json();
-          if (orderData && orderData.items) {
+        // If the table is serving or paid, fetch its last order
+        if (table.status === 'serving' || table.status === 'paid') {
+          const orderResponse = await fetch(`/api/get_last_order.php?table_id=${table.id}`, { credentials: 'include' });
+          const orderResult = await orderResponse.json();
+          
+          if (orderResult.status === 'success' && orderResult.data) {
+            const orderData = orderResult.data;
+            // Populate customer info and factor ID
+            setCustomerName(orderData.customer_name || '');
+            setCustomerPhone(orderData.customer_phone || '');
+            setCurrentFactorId(orderData.id);
+
+            // Format items to match the state structure
             const formattedItems = orderData.items.map((item: ApiOrderItem) => {
-              const menuItem = menuData.items.find(mi => mi.id.toString() === item.item_id.toString());
+              const menuItem = menuData.items.find(mi => mi.id.toString() === item.menu_item_id.toString());
               if (!menuItem) return null;
               return {
-                id: item.id.toString(),
+                id: item.id.toString(), // This is the order_item ID
                 menuItem,
                 quantity: item.quantity,
                 notes: item.notes || ''
               };
             }).filter(Boolean) as OrderItem[];
             setCurrentOrder(formattedItems);
+          } else {
+            setCurrentOrder([]);
+            setCustomerName('');
+            setCustomerPhone('');
+            setCurrentFactorId(null);
           }
         } else {
+          // If table is free or reserved, reset the order state
           setCurrentOrder([]);
+          setCustomerName('');
+          setCustomerPhone('');
+          setCurrentFactorId(null);
         }
       } catch (error) {
         console.error("Failed to load modal data:", error);
-        toast({ title: "خطا", description: "دریافت اطلاعات منو ناموفق بود.", variant: "destructive" });
+        toast({ title: "خطا", description: "دریافت اطلاعات ناموفق بود.", variant: "destructive" });
       } finally {
         setIsLoading(false);
       }
@@ -184,7 +204,7 @@ const OrderModal = ({ table, open, onClose, onDataRefresh, currentUser }: OrderM
 
         } else if (quantity > 0) {
             const newOrderItem: OrderItem = {
-                id: crypto.randomUUID(),
+                id: crypto.randomUUID(), // A temporary ID for new items
                 menuItem,
                 quantity,
                 notes,
@@ -211,23 +231,27 @@ const OrderModal = ({ table, open, onClose, onDataRefresh, currentUser }: OrderM
         body: JSON.stringify(body),
       });
       const result = await response.json();
-      if (result.status !== 'success') throw new Error(result.error || 'Server error');
+      if (result.status !== 'success') {
+        throw new Error(result.message || result.error || 'Server error');
+      }
       toast({ title: "موفق", description: successMessage });
       onDataRefresh();
       onClose();
     } catch (error) {
       console.error("API Action Failed:", error);
-      toast({ title: "خطا", description: "عملیات ناموفق بود.", variant: "destructive" });
+      const errorMessage = error instanceof Error ? error.message : "عملیات ناموفق بود.";
+      toast({ title: "خطا", description: errorMessage, variant: "destructive" });
     }
   };
   
   const createOrderPayload = () => ({
     table_id: table?.id,
-    factor_id: table?.currentOrder?.id,
-    user_id: currentUser?.id,
+    factor_id: currentFactorId, 
+    system_user_id: currentUser?.id,
     customer_phone: customerPhone,
+    customer_name: customerName,
     items: currentOrder.map(item => ({
-      id: item.menuItem.id,
+      id: item.menuItem.id, 
       quantity: item.quantity,
       price: item.menuItem.price,
       notes: item.notes,
@@ -235,44 +259,71 @@ const OrderModal = ({ table, open, onClose, onDataRefresh, currentUser }: OrderM
   });
 
   const handleCreateFactor = () => {
+    if (!customerName.trim()) {
+        toast({ title: "نام مشتری الزامی است", description: "لطفاً نام مشتری را وارد کنید.", variant: "destructive" });
+        return;
+    }
     if (currentOrder.length === 0) {
       toast({ title: "سفارش خالی", description: "لطفاً آیتم‌هایی به سفارش اضافه کنید", variant: "destructive" });
       return;
+    }
+    if (!currentUser?.id) {
+        toast({ title: "خطا در احراز هویت", description: "کاربر شناسایی نشد. لطفاً دوباره وارد شوید.", variant: "destructive" });
+        return;
     }
     handleApiAction('/api/create_factor.php', createOrderPayload(), "فاکتور با موفقیت ثبت شد.");
   };
 
   const handleUpdateFactor = () => {
+    if (!currentFactorId || currentFactorId <= 0) {
+        toast({ title: "خطا در بروزرسانی", description: "شناسه فاکتور معتبری برای بروزرسانی یافت نشد.", variant: "destructive" });
+        return;
+    }
+    if (!customerName.trim()) {
+        toast({ title: "نام مشتری الزامی است", description: "لطفاً نام مشتری را وارد کنید.", variant: "destructive" });
+        return;
+    }
     if (currentOrder.length === 0) {
       toast({ title: "سفارش خالی", description: "سفارش را نمی‌توان خالی بروزرسانی کرد.", variant: "destructive" });
       return;
+    }
+    if (!currentUser?.id) {
+        toast({ title: "خطا در احراز هویت", description: "کاربر شناسایی نشد. لطفاً دوباره وارد شوید.", variant: "destructive" });
+        return;
     }
     handleApiAction('/api/update_factor.php', createOrderPayload(), "سفارش با موفقیت بروزرسانی شد.");
   };
   
   const handleUpdateStatus = (newStatus: TableStatus) => {
     if (!table) return;
-    handleApiAction('/api/update_table_status.php', { id: table.id, status: newStatus }, `وضعیت میز ${table.name} بروزرسانی شد`);
+
+    // Special handling for 'paid' status to also update the factor
+    if (newStatus === 'paid') {
+        if (!currentFactorId) {
+            toast({ title: "خطا", description: "فاکتوری برای تسویه یافت نشد.", variant: "destructive"});
+            return;
+        }
+        handleApiAction('/api/update_statuses.php', { factor_id: currentFactorId, table_id: table.id, factor_status: 'paid', table_status: 'paid' }, `سفارش تسویه شد.`);
+    } else {
+        handleApiAction('/api/update_table_status.php', { id: table.id, status: newStatus }, `وضعیت میز بروزرسانی شد.`);
+    }
   };
 
   if (!table) return null;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl w-full h-full sm:h-auto max-h-[95vh] bg-background/95 backdrop-blur-sm flex flex-col p-4 sm:p-6">
-        <DialogHeader className="pb-4 border-b">
+      <DialogContent className="max-w-4xl w-full h-full sm:h-auto max-h-[96vh] bg-background/95 backdrop-blur-sm flex flex-col p-1 sm:p-4">
+        <DialogHeader className="pb-1 border-b">
           <div className="flex items-center justify-between">
             <div>
               <DialogTitle className="text-2xl flex items-center gap-2">
-                <Coffee className="w-6 h-6 text-primary" />
+                <Coffee className="w-9 h-9 text-primary" />
                 میز {table.name}
               </DialogTitle>
-              <DialogDescription className="mt-2">
-                سفارش جدید ثبت کنید یا سفارش فعلی را ویرایش نمایید.
-              </DialogDescription>
             </div>
             <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
-              <X className="w-4 h-4" />
+              <X className="w-7 h-7" />
             </Button>
           </div>
         </DialogHeader>
@@ -283,18 +334,17 @@ const OrderModal = ({ table, open, onClose, onDataRefresh, currentUser }: OrderM
             <div className="flex flex-col md:flex-row gap-4 flex-1 min-h-0">
               
               {/* Menu Section */}
-              <div className="flex-auto md:flex-1 flex flex-col min-h-0">
-                  <h3 className="text-lg font-semibold mb-2 flex-shrink-0">منو</h3>
-                  <Tabs defaultValue={menuCategories[0]?.id.toString() || '1'} className="flex-1 flex flex-col min-h-0">
-                      <ScrollArea className="w-full whitespace-nowrap">
-                        <TabsList className="flex-nowrap">
+              <div className="flex-1 flex flex-col min-h-0 min-w-0">
+                  <Tabs defaultValue={menuCategories[0]?.id.toString() || '1'} className="flex-1 flex flex-col min-h-0 mt-4">
+                      <div className="w-full overflow-x-auto">
+                        <TabsList className="inline-flex">
                             {menuCategories.map((category) => (
                             <TabsTrigger key={category.id} value={category.id.toString()} className="px-4 py-2 text-sm flex-shrink-0">
                                 {category.name}
                             </TabsTrigger>
                             ))}
                         </TabsList>
-                      </ScrollArea>
+                      </div>
                       
                       <ScrollArea className="flex-1 mt-2">
                           {menuCategories.map((category) => (
@@ -318,15 +368,11 @@ const OrderModal = ({ table, open, onClose, onDataRefresh, currentUser }: OrderM
               <Separator orientation="vertical" className="hidden md:block" />
 
               {/* Order Summary Section */}
-              <div className="w-full md:w-80 flex-auto md:flex-initial flex flex-col min-h-0 max-h-[50vh] md:max-h-none">
+              <div className="w-full md:w-80 flex-1 md:flex-initial flex flex-col min-h-0">
                   <div className="flex-shrink-0">
-                      <div className="flex items-center gap-2 mb-2">
-                          <ShoppingCart className="w-5 h-5 text-primary" />
-                          <h3 className="text-lg font-semibold">سفارش فعلی</h3>
-                      </div>
                       <div className="grid gap-2 mb-2">
-                          <Label htmlFor="customer-phone">شماره تلفن مشتری (اختیاری)</Label>
-                          <Input id="customer-phone" placeholder="مثال: 09123456789" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
+                          <Input id="customer-name" placeholder="نام مشتری" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
+                          <Input id="customer-phone" placeholder="شماره تلفن مشتری (اختیاری)" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
                       </div>
                   </div>
                   
@@ -371,8 +417,21 @@ const OrderModal = ({ table, open, onClose, onDataRefresh, currentUser }: OrderM
                               <Button onClick={() => handleUpdateStatus('reserved')} className="w-full" variant="secondary">رزرو میز</Button>
                           </>
                           )}
-                          {table.status === 'serving' && <Button onClick={handleUpdateFactor} className="w-full">بروزرسانی سفارش</Button>}
-                          {(table.status === 'paid' || table.status === 'reserved') && <Button onClick={() => handleUpdateStatus('free')} className="w-full">آزادسازی میز</Button>}
+                          {table.status === 'serving' && (
+                            <>
+                              <Button onClick={handleUpdateFactor} className="w-full">بروزرسانی سفارش</Button>
+                              <Button onClick={() => handleUpdateStatus('paid')} className="w-full bg-blue-600 hover:bg-blue-700 text-white">تسویه شده</Button>
+                            </>
+                          )}
+                           {table.status === 'reserved' && (
+                            <div className="space-y-2">
+                                <Button onClick={handleCreateFactor} className="w-full bg-green-600 hover:bg-green-700 text-white">گرفتن سفارش</Button>
+                                <Button onClick={() => handleUpdateStatus('free')} className="w-full" variant="destructive">کنسل رزرو</Button>
+                            </div>
+                           )}
+                          {table.status === 'paid' && (
+                            <Button onClick={() => handleUpdateStatus('free')} className="w-full">آزادسازی میز</Button>
+                          )}
                       </div>
                   </div>
               </div>

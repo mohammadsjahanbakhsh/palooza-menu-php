@@ -1,24 +1,33 @@
 <?php
 // /api/create_factor.php
 
-// 1. Include the main bootstrap file for database connection and headers
 require_once __DIR__ . '/bootstrap.php';
 
-// 2. Read the JSON data sent from the frontend
 $input = json_decode(file_get_contents('php://input'), true);
 
-// 3. Validate the essential input fields
-if (!isset($input['table_id']) || !isset($input['user_id']) || !isset($input['items']) || !is_array($input['items'])) {
+// 1. اعتبارسنجی داده‌های ورودی
+if (empty($input['table_id']) || empty($input['system_user_id']) || !isset($input['items']) || !is_array($input['items']) || empty($input['customer_name'])) {
     http_response_code(400); // Bad Request
-    echo json_encode(['error' => 'Required fields are missing: table_id, user_id, and items array.']);
+    echo json_encode(['status' => 'error', 'message' => 'فیلدهای الزامی خالی هستند: شناسه میز، شناسه کاربر، نام مشتری و آیتم‌ها.']);
     exit();
 }
 
 try {
-    // 4. Start a database transaction to ensure all queries succeed or fail together
+    // **مرحله جدید: بررسی وجود کاربر قبل از شروع تراکنش**
+    // UPDATED: Corrected table name from 'system_user' to 'system_users'
+    $user_check_sql = "SELECT id FROM system_users WHERE id = ?";
+    $user_check_stmt = $pdo->prepare($user_check_sql);
+    $user_check_stmt->execute([$input['system_user_id']]);
+    if ($user_check_stmt->fetch() === false) {
+        http_response_code(404); // Not Found
+        echo json_encode(['status' => 'error', 'message' => 'شناسه کاربر نامعتبر است. کاربر در سیستم یافت نشد.']);
+        exit();
+    }
+
+    // 2. شروع تراکنش برای اطمینان از اجرای کامل یا لغو تمام دستورات
     $pdo->beginTransaction();
 
-    // 5. Calculate the total invoice amount from the items array
+    // 3. محاسبه مبلغ کل فاکتور
     $invoice_amount = 0;
     foreach ($input['items'] as $item) {
         if (isset($item['price']) && isset($item['quantity'])) {
@@ -26,38 +35,45 @@ try {
         }
     }
     
-    // 6. Handle the optional phone number: use NULL if it's empty or not provided
-    $phone = !empty($input['useer_id_phone']) ? $input['useer_id_phone'] : NULL;
+    // 4. دریافت داده‌ها از ورودی
+    $phone = !empty($input['customer_phone']) ? $input['customer_phone'] : NULL;
+    $customer_name = $input['customer_name'];
+    $table_id = $input['table_id'];
+    $system_user_id = $input['system_user_id'];
 
-    // 7. Insert the main record into the 'factor' table
-    $factor_sql = "INSERT INTO factor (useer_id_phone, invoice_amount, user_id, status) VALUES (?, ?, ?, 'open')";
+    // 5. ثبت رکورد اصلی در جدول 'factor'
+    $factor_sql = "INSERT INTO factor (table_id, customer_name, customer_phone, invoice_amount, system_user_id, status) VALUES (?, ?, ?, ?, ?, 'open')";
     $factor_stmt = $pdo->prepare($factor_sql);
-    $factor_stmt->execute([$phone, $invoice_amount, $input['user_id']]);
-    $factor_id = $pdo->lastInsertId(); // Get the ID of the newly created factor
+    $factor_stmt->execute([$table_id, $customer_name, $phone, $invoice_amount, $system_user_id]);
+    $factor_id = $pdo->lastInsertId(); // دریافت شناسه فاکتور جدید
 
-    // 8. Insert each item from the order into the 'order_items' table
-    $item_sql = "INSERT INTO order_items (order_id, item_id, quantity, price) VALUES (?, ?, ?, ?)";
+    // 6. ثبت هر آیتم سفارش در جدول 'order_items'
+    // توجه: فرض شده ستون 'notes' در جدول order_items وجود دارد.
+    $item_sql = "INSERT INTO order_items (factor_id, menu_item_id, quantity, price, notes) VALUES (?, ?, ?, ?, ?)";
     $item_stmt = $pdo->prepare($item_sql);
     foreach ($input['items'] as $item) {
-        $item_stmt->execute([$factor_id, $item['id'], $item['quantity'], $item['price']]);
+        $notes = isset($item['notes']) ? $item['notes'] : null;
+        $item_stmt->execute([$factor_id, $item['id'], $item['quantity'], $item['price'], $notes]);
     }
 
-    // 9. Update the table's status to 'serving'
+    // 7. به‌روزرسانی وضعیت میز به 'serving'
     $table_sql = "UPDATE tables SET status = 'serving' WHERE id = ?";
     $table_stmt = $pdo->prepare($table_sql);
-    $table_stmt->execute([$input['table_id']]);
+    $table_stmt->execute([$table_id]);
 
-    // 10. If all queries were successful, commit the transaction
+    // 8. تایید نهایی تراکنش
     $pdo->commit();
     
-    echo json_encode(['status' => 'success', 'message' => 'Factor created successfully.', 'factor_id' => $factor_id]);
+    echo json_encode(['status' => 'success', 'message' => 'فاکتور با موفقیت ثبت شد.', 'factor_id' => $factor_id]);
 
 } catch (Exception $e) {
-    // 11. If any query fails, roll back all changes
+    // 9. در صورت بروز خطا، تمام تغییرات لغو می‌شود
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
     http_response_code(500);
-    echo json_encode(['error' => 'Transaction failed: ' . $e->getMessage()]);
+    // ارسال پیام خطای دقیق از دیتابیس
+    echo json_encode(['status' => 'error', 'message' => 'عملیات ناموفق بود: ' . $e->getMessage()]);
 }
 ?>
+
