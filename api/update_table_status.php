@@ -33,3 +33,4 @@ try {
     echo json_encode(['status' => 'error', 'message' => 'بروزرسانی وضعیت میز ناموفق بود: ' . $e->getMessage()]);
 }
 ?>
+
